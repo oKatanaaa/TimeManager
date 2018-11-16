@@ -34,7 +34,7 @@ class WeekRecycleAdapter(val context: Context, val week: ArrayList<Day>) : Recyc
         val dayListView = itemView?.findViewById<ListView>(R.id.eventListView)
 
         fun bindDay(day: Day, context: Context) {
-            dayListView?.adapter = DayAdapter(context, day)
+            dayListView?.adapter = DayListAdapter(context, day)
             dayName?.text = day.title
         }
     }
