@@ -27,6 +27,8 @@ class DayListAdapter(val context: Context, val day: Day) : BaseAdapter() {
 
         val event = day.getEvent(position)
         holder.eventName?.text = event.title
+
+
         return eventView
     }
 
