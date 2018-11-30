@@ -9,8 +9,11 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Day
+import com.okatanaa.timemanager.model.Event
+import kotlinx.android.synthetic.main.day_item.view.*
 
-class DayListAdapter(val context: Context, val day: Day) : BaseAdapter() {
+class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event) -> Unit) : BaseAdapter() {
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val eventView: View
         val holder: ViewHolder
@@ -25,9 +28,14 @@ class DayListAdapter(val context: Context, val day: Day) : BaseAdapter() {
             eventView = convertView
         }
 
+
         val event = day.getEvent(position)
         holder.eventName?.text = event.title
 
+        // Make events in the list clickable!
+        // We need to update listener each time because otherwise
+        // event activity would get another event(not one you clicked on)
+        eventView.setOnClickListener { eventClick(event) }
 
         return eventView
     }
@@ -44,7 +52,12 @@ class DayListAdapter(val context: Context, val day: Day) : BaseAdapter() {
         return day.eventCount()
     }
 
+
     private class ViewHolder {
         var eventName: TextView? = null
+    }
+
+    fun addEvent() {
+        day.addEvent(Event("Empty event"))
     }
 }

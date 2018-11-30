@@ -1,12 +1,10 @@
 package com.okatanaa.timemanager.model
 
-class Day {
+class Day(events: ArrayList<Event>, val title: String) {
     private val events: ArrayList<Event>
-    val title: String
 
-    constructor(events: ArrayList<Event>, title: String) {
+    init {
         this.events = ArrayList<Event>(events)
-        this.title = title
     }
 
     fun addEvent(event: Event) {
