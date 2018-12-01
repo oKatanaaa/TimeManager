@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         // Read week from json
+        println("Read week")
         val week = JsonHelper.readFirstWeekFromJson(JsonHelper.readJSON(this))
         this.adapter = WeekRecycleAdapter(this, week,
             // Create lambda for the starting EventActivity

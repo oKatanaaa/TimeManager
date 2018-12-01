@@ -1,6 +1,7 @@
 package com.okatanaa.timemanager.services
 
 import android.content.Context
+import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
@@ -16,7 +17,7 @@ class JsonHelper {
             // Read json as a string
             var jsonString: String? = null
 
-            val input: InputStream = context.assets.open("json_file.json")
+            val input: InputStream = context.resources.openRawResource(R.raw.json_file)
             val size = input.available()
             val buffer: ByteArray = ByteArray(size)
             input.read(buffer)
@@ -39,7 +40,7 @@ class JsonHelper {
             val jsonDayArray = json.getJSONArray(JSON_DAYS)
 
             val dayList = arrayListOf<Day>()
-            for (i in 0..jsonDayArray.length()) {
+            for (i in 0 until jsonDayArray.length()) {
                 dayList.add(dayFromJson(jsonDayArray[i] as JSONObject))
             }
             return Week(dayList)
@@ -50,7 +51,7 @@ class JsonHelper {
             val jsonEventArray = json.getJSONArray(JSON_EVENTS)
 
             val eventList = arrayListOf<Event>()
-            for (i in 0..jsonEventArray.length()) {
+            for (i in 0 until jsonEventArray.length()) {
                 eventList.add(eventFromJson(jsonEventArray[i] as JSONObject))
             }
             return Day(eventList, dayName)
