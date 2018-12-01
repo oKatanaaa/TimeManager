@@ -8,23 +8,33 @@ import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.utilities.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.io.InputStream
 
 class JsonHelper {
     companion object {
-
         fun readJSON(context: Context): JSONObject {
             // Read json as a string
             var jsonString: String? = null
 
-            val input: InputStream = context.resources.openRawResource(R.raw.json_file)
-            val size = input.available()
-            val buffer: ByteArray = ByteArray(size)
-            input.read(buffer)
-            input.close()
-            jsonString = String(buffer)
+            // Check if json file with user's data exists
+            var input: InputStream? = null
+            try {
+                input = context.openFileInput(JSON_FILENAME)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
 
-            // Convert json string to a JSON object
+            // Json file does not exist. Read data from resources
+            if(input == null)
+                input = context.resources.openRawResource(R.raw.json_file)
+
+            // Read data
+            val size = input?.available()
+            val buffer: ByteArray = ByteArray(size!!)
+            input?.read(buffer)
+            input?.close()
+            jsonString = String(buffer)
 
             val json = JSONObject(jsonString)
             return json
@@ -57,12 +67,44 @@ class JsonHelper {
             return Day(eventList, dayName)
         }
 
+
         fun eventFromJson(json: JSONObject): Event {
             val eventName = json.get(JSON_NAME) as String
             val eventDescription = json.get(JSON_DESCRIPTION) as String
             return Event(eventName, eventDescription)
         }
 
+        fun weekToJson(week: Week): JSONObject {
+            val json = JSONObject()
+
+            val jsonArray = JSONArray()
+            for(i in 0 until week.count()){
+                jsonArray.put(dayToJson(week.getDay(i)))
+            }
+
+            json.put(JSON_DAYS, jsonArray)
+            return json
+        }
+
+        fun dayToJson(day: Day): JSONObject {
+            val json = JSONObject()
+            json.put(JSON_NAME, day.title)
+
+            val jsonArray = JSONArray()
+            for(i in 0 until day.eventCount()){
+                jsonArray.put(eventToJson(day.getEvent(i)))
+            }
+
+            json.put(JSON_EVENTS, jsonArray)
+            return json
+        }
+
+        fun eventToJson(event: Event): JSONObject {
+            val json = JSONObject()
+            json.put(JSON_NAME, event.title)
+            json.put(JSON_DESCRIPTION, event.description)
+            return json
+        }
     }
 }
 

@@ -13,3 +13,5 @@ const val JSON_DESCRIPTION = "description"
 const val JSON_EVENTS = "events"
 const val JSON_DAYS = "days"
 const val JSON_WEEKS = "weeks"
+// JSON FILENAME
+const val JSON_FILENAME = "app_data.json"
