@@ -2,7 +2,6 @@ package com.okatanaa.timemanager.controller
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Editable
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.utilities.EXTRA_EVENT
@@ -21,13 +20,21 @@ class EventActivity : AppCompatActivity() {
         setContentView(R.layout.activity_event)
 
         event = intent.getParcelableExtra<Event>(EXTRA_EVENT)
+
+        // Set event name
         eventTitleTxt.setText(event.title)
+        // Set event description
+        eventDescriptionTxt.setText(event.description)
     }
 
     fun onClickedDoneBtn(view: View) {
-        println("Finish")
+        // Save changed data
+        // Save new event name
         event.title = eventTitleTxt.text.toString()
-        println(event)
+        // Save new event description
+        event.description = eventDescriptionTxt.text.toString()
+
+        // Paste data to Intent
         val resultIntent = Intent()
         resultIntent.putExtra(EXTRA_EVENT, this.event)
         setResult(Activity.RESULT_OK, resultIntent)

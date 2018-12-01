@@ -3,12 +3,23 @@ package com.okatanaa.timemanager.model
 import android.os.Parcel
 import android.os.Parcelable
 
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class Event(var title: String) : Parcelable {
-    constructor(parcel: Parcel) : this(parcel.readString()) {
+    var description: String = "Empty description"
+
+    constructor(title: String, description: String) : this(title) {
+        this.description = description
+    }
+
+    constructor(parcel: Parcel) : this(
+        parcel.readString()
+     ) {
+        description = parcel.readString()
     }
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.writeString(title)
+        dest?.writeString(description)
     }
 
     override fun describeContents(): Int {

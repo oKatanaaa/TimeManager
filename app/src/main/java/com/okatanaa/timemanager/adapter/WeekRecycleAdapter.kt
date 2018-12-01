@@ -12,6 +12,7 @@ import android.widget.Toast
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
+import com.okatanaa.timemanager.model.Week
 
 
 /*
@@ -31,7 +32,7 @@ import com.okatanaa.timemanager.model.Event
 *
 * MainActivity -> WeekRecycleAdapter -> DayListAdapter
  */
-class WeekRecycleAdapter(val context: Context, val week: ArrayList<Day>, val eventClick: (Event) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.Adapter<WeekRecycleAdapter.Holder>() {
+class WeekRecycleAdapter(val context: Context, val week: Week, val eventClick: (Event) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.Adapter<WeekRecycleAdapter.Holder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(context)
             .inflate(R.layout.week_item, parent, false)
@@ -44,7 +45,7 @@ class WeekRecycleAdapter(val context: Context, val week: ArrayList<Day>, val eve
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder?.bindDay(week[position], context)
+        holder?.bindDay(week.getDay(position), context)
     }
 
     inner class Holder(itemView: View, val eventClick: (Event) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.ViewHolder(itemView) {

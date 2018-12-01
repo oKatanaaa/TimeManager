@@ -1,9 +1,38 @@
 {
-  "Day": {
-    "events" : [
-      "Math",
-      "English",
-
-    ]
-  }
+  "weeks": [
+    {
+      "days": [
+        {
+          "name": "Monday",
+          "events": [
+            {
+              "name": "Math",
+              "description": "Empty description"
+            },
+            {
+              "name": "Physics",
+              "description": "Physics lesson"
+            },
+            {
+              "name": "English",
+              "description": "English lesson"
+            }
+          ]
+        },
+        {
+          "name": "Tuesday",
+          "events": [
+            {
+              "name": "Math",
+              "description": "Empty description"
+            },
+            {
+              "name": "Astronomy",
+              "description": "Astronomy lesson"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

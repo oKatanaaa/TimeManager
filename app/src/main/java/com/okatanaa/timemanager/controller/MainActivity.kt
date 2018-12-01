@@ -1,19 +1,15 @@
 package com.okatanaa.timemanager.controller
 
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.view.View
-import android.widget.EditText
 import android.widget.Toast
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.adapter.WeekRecycleAdapter
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
-import com.okatanaa.timemanager.services.DataService
+import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.EXTRA_EVENT
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -25,8 +21,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        this.adapter = WeekRecycleAdapter(this, DataService.week,
+        // Read week from json
+        val week = JsonHelper.readFirstWeekFromJson(JsonHelper.readJSON(this))
+        this.adapter = WeekRecycleAdapter(this, week,
             // Create lambda for the starting EventActivity
             { event : Event ->
                 println("Event clicked!")
@@ -53,12 +50,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        println("DONE")
         super.onActivityResult(requestCode, resultCode, data)
-        modifiingEvent?.let { it ->
-            it.title = data?.getParcelableExtra<Event>(EXTRA_EVENT)!!.title
-        }
+        // Receive changed event
+        val changedEvent = data?.getParcelableExtra(EXTRA_EVENT) as Event
+        // Change picked event data to received data
+        this.modifiingEvent.description = changedEvent.description
+        this.modifiingEvent.title = changedEvent.title
+
         this.adapter.notifyDataSetChanged()
         println("DONE")
     }
+
+
 }
