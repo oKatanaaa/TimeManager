@@ -8,43 +8,69 @@ import com.okatanaa.timemanager.utilities.EXTRA_EVENT_JSON
 import kotlinx.android.synthetic.main.activity_event.*
 import android.app.Activity
 import android.content.Intent
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
+import com.okatanaa.timemanager.additional_classes.TextClickedListener
 import com.okatanaa.timemanager.services.JsonHelper
+import com.okatanaa.timemanager.utilities.EXTRA_EDITED_NAME
+import com.okatanaa.timemanager.utilities.EXTRA_EDITED_VALUE
+import kotlinx.android.synthetic.main.content_event.*
 import org.json.JSONObject
 
 
 class EventActivity : AppCompatActivity() {
 
     lateinit var event : Event
+    val EVENT_NAME = "Event Name"
+    val DESCRIPTION = "Description"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event)
+        setSupportActionBar(toolbar)
+
         val eventJsonString = intent.getStringExtra(EXTRA_EVENT_JSON)
         val eventJson = JSONObject(eventJsonString)
         event = JsonHelper.eventFromJson(eventJson)
 
         eventNameTxt.setText(event.name)
-        eventDescriptionTxt.setText(event.description)
+        eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, "Event Name", eventNameTxt.text.toString())}
+
+        eventDescriptionTxt.text = event.description
+        eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, "Description", eventDescriptionTxt.text.toString())}
         inWhatDayTxt.text = event.inDay
-
-        setSpinner()
     }
 
-    fun setSpinner() {
-        val optionsSpinner = findViewById<Spinner>(R.id.optionsSpinner)
-        val options = arrayListOf("Delete event")
-        val spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.options, android.R.layout.simple_spinner_item)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        optionsSpinner.adapter = spinnerAdapter
-        optionsSpinner.onItemSelectedListener = SpinnerListener()
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_event, menu)
+        return true
     }
 
-    fun onClickedDoneBtn(view: View){
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_delete_event -> actionDeleteEvent()
+            R.id.action_save_event -> actionSaveEvent()
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    fun actionDeleteEvent(): Boolean {
+        val resultIntent = Intent()
+        setResult(Activity.RESULT_CANCELED, resultIntent)
+        println("Finish")
+        finish()
+        return true
+    }
+
+    fun actionSaveEvent(): Boolean {
         // Save changed data
         event.name = eventNameTxt.text.toString()
         event.description = eventDescriptionTxt.text.toString()
@@ -53,19 +79,27 @@ class EventActivity : AppCompatActivity() {
         setResult(Activity.RESULT_OK, resultIntent)
         println("Finish")
         finish()
+        return true
     }
 
-    class SpinnerListener: AdapterView.OnItemSelectedListener {
-        override fun onNothingSelected(parent: AdapterView<*>?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        }
+        if(resultCode == Activity.RESULT_OK)
+            when(data?.getStringExtra(EXTRA_EDITED_NAME)) {
+                EVENT_NAME->
+                    eventNameTxt.text = data?.getStringExtra(EXTRA_EDITED_VALUE)
+                DESCRIPTION ->
+                    eventDescriptionTxt.text = data?.getStringExtra(EXTRA_EDITED_VALUE)
+                else ->
+                    Unit
+            }
+    }
 
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            val text = parent?.getItemAtPosition(position).toString()
-            Toast.makeText(parent!!.context, text, Toast.LENGTH_SHORT).show()
-
-        }
-
+    override fun onDestroy() {
+        super.onDestroy()
+        setResult(Activity.RESULT_CANCELED, Intent())
+        finish()
     }
 
 }

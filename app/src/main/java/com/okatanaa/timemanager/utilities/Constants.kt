@@ -7,7 +7,8 @@ import org.json.JSONObject
 
 // EXTRAS
 const val EXTRA_EVENT_JSON = "event_json"
-
+const val EXTRA_EDITED_NAME = "edited_name"
+const val EXTRA_EDITED_VALUE = "edited_value"
 
 // JSON DATA
 const val JSON_NAME = "name"

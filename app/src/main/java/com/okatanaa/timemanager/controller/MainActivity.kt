@@ -1,5 +1,6 @@
 package com.okatanaa.timemanager.controller
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -65,6 +66,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if(resultCode == Activity.RESULT_CANCELED)
+            return
         // Receive changed event
         val changedEventJsonString = data?.getStringExtra(EXTRA_EVENT_JSON)
         val changedEventJson = JSONObject(changedEventJsonString)

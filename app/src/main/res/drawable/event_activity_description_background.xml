@@ -5,9 +5,4 @@
             android:color="#ffffff"
     />
 
-    <stroke
-            android:width="0.1dp"
-            android:color="#8c8c8c"
-    />
-
 </shape>
