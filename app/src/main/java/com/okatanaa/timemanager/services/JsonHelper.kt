@@ -1,14 +1,12 @@
 package com.okatanaa.timemanager.services
 
 import android.content.Context
-import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.utilities.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 import java.io.InputStream
 
 class JsonHelper {
@@ -19,15 +17,15 @@ class JsonHelper {
 
             // Check if json file with user's data exists
             var input: InputStream? = null
-            try {
-                input = context.openFileInput(JSON_FILENAME)
+            /*try {
+                input = context.openFileInput(JSON_PRIMARY_DATA_WEEK_FILE)
             } catch (e: IOException) {
                 e.printStackTrace()
-            }
+            }*/
 
             // Json file does not exist. Read data from resources
             if(input == null)
-                input = context.resources.openRawResource(R.raw.json_file)
+                input = context.resources.openRawResource(JSON_DEFAULT_DATA_WEEK_FILE)
 
             // Read data
             val size = input?.available()
@@ -69,9 +67,14 @@ class JsonHelper {
 
 
         fun eventFromJson(json: JSONObject): Event {
-            val eventName = json.get(JSON_NAME) as String
-            val eventDescription = json.get(JSON_DESCRIPTION) as String
-            return Event(eventName, eventDescription)
+            val eventName = json.getString(JSON_NAME)
+            val eventDescription = json.getString(JSON_DESCRIPTION)
+            val eventInDay = json.getString(JSON_IN_DAY)
+            val startTimeJsonArray = json.getJSONArray(JSON_START_TIME)
+            val startTime = arrayListOf(startTimeJsonArray[0] as Int, startTimeJsonArray[1] as Int)
+            val endTimeJsonArray = json.getJSONArray(JSON_END_TIME)
+            val endTime = arrayListOf(endTimeJsonArray[0] as Int, endTimeJsonArray[1] as Int)
+            return Event(eventName, eventDescription, startTime, endTime, eventInDay)
         }
 
         fun weekToJson(week: Week): JSONObject {
@@ -101,8 +104,20 @@ class JsonHelper {
 
         fun eventToJson(event: Event): JSONObject {
             val json = JSONObject()
-            json.put(JSON_NAME, event.title)
+            json.put(JSON_NAME, event.name)
             json.put(JSON_DESCRIPTION, event.description)
+            json.put(JSON_IN_DAY, event.inDay)
+
+            val jsonArrayStartTime = JSONArray()
+            jsonArrayStartTime.put(event.startTime[0])
+            jsonArrayStartTime.put(event.startTime[1])
+            json.put(JSON_START_TIME, jsonArrayStartTime)
+
+            val jsonArrayEndTime = JSONArray()
+            jsonArrayEndTime.put(event.endTime[0])
+            jsonArrayEndTime.put(event.endTime[1])
+            json.put(JSON_END_TIME, jsonArrayEndTime)
+
             return json
         }
     }

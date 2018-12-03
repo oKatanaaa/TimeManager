@@ -8,6 +8,7 @@ class Day(events: ArrayList<Event>, val title: String) {
     }
 
     fun addEvent(event: Event) {
+        event.setDay(this.title)
         events.add(event)
     }
 

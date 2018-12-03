@@ -13,14 +13,12 @@ import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.JsonHelper
-import com.okatanaa.timemanager.utilities.EXTRA_EVENT
-import com.okatanaa.timemanager.utilities.JSON_FILENAME
+import com.okatanaa.timemanager.utilities.EXTRA_EVENT_JSON
+import com.okatanaa.timemanager.utilities.JSON_PRIMARY_DATA_WEEK_FILE
 import com.okatanaa.timemanager.utilities.JSON_WEEKS
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.week_item.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,13 +32,18 @@ class MainActivity : AppCompatActivity() {
         // Read week from json
         println("Read week")
         this.week = JsonHelper.readFirstWeekFromJson(JsonHelper.readJSON(this))
+        setWeekRecycleAdapter()
+    }
+
+    fun setWeekRecycleAdapter() {
         this.adapter = WeekRecycleAdapter(this, this.week,
             // Create lambda for the starting EventActivity
             { event : Event ->
                 println("Event clicked!")
                 this.modifiingEvent = event
                 val eventIntent = Intent(this, EventActivity::class.java)
-                eventIntent.putExtra(EXTRA_EVENT, event)
+                val eventJson = JsonHelper.eventToJson(event)
+                eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
                 startActivityForResult(eventIntent, 0)
             },
             // Create lambda for the adding new empty event
@@ -63,10 +66,11 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         // Receive changed event
-        val changedEvent = data?.getParcelableExtra(EXTRA_EVENT) as Event
+        val changedEventJsonString = data?.getStringExtra(EXTRA_EVENT_JSON)
+        val changedEventJson = JSONObject(changedEventJsonString)
+        val changedEvent = JsonHelper.eventFromJson(changedEventJson)
         // Change picked event data to received data
-        this.modifiingEvent.description = changedEvent.description
-        this.modifiingEvent.title = changedEvent.title
+        this.modifiingEvent.copy(changedEvent)
         val scrollPosition = findViewById<RecyclerView>(R.id.weekRecycleView).scrollState
 
         this.adapter.notifyDataSetChanged()
@@ -86,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         val jsonArray = JSONArray()
         jsonArray.put(JsonHelper.weekToJson(this.week))
         json.put(JSON_WEEKS, jsonArray)
-        this.openFileOutput(JSON_FILENAME, Context.MODE_PRIVATE).use {
+        this.openFileOutput(JSON_PRIMARY_DATA_WEEK_FILE, Context.MODE_PRIVATE).use {
             it.write(json.toString().toByteArray())
         }
     }

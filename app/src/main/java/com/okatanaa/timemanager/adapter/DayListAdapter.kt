@@ -1,7 +1,6 @@
 package com.okatanaa.timemanager.adapter
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import android.widget.TextView
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
-import kotlinx.android.synthetic.main.day_item.view.*
 
 class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event) -> Unit) : BaseAdapter() {
 
@@ -21,7 +19,9 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event)
         if(convertView == null) {
             eventView = LayoutInflater.from(context).inflate(R.layout.day_item, null)
             holder = ViewHolder()
-            holder.eventName = eventView.findViewById(R.id.eventName)
+            holder.eventNameTxt = eventView.findViewById(R.id.eventNameTxt)
+            holder.startTimeTxt = eventView.findViewById(R.id.startTimeTxt)
+            holder.endTimeTxt = eventView.findViewById(R.id.endTimeTxt)
             eventView.tag = holder
         } else {
             holder = convertView.tag as ViewHolder
@@ -30,7 +30,9 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event)
 
 
         val event = day.getEvent(position)
-        holder.eventName?.text = event.title
+        holder.eventNameTxt?.text = event.name
+        holder.startTimeTxt?.text = "${event.startTime[0].toString()}:${event.startTime[1]}"
+        holder.endTimeTxt?.text = "${event.endTime[0].toString()}:${event.endTime[1]}"
 
         // Make events in the list clickable!
         // We need to update listener each time because otherwise
@@ -54,7 +56,9 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event)
 
 
     private class ViewHolder {
-        var eventName: TextView? = null
+        var eventNameTxt: TextView? = null
+        var startTimeTxt: TextView? = null
+        var endTimeTxt: TextView? = null
     }
 
     fun addEvent() {

@@ -1,0 +1,45 @@
+{
+  "weeks": [
+    {
+      "name" : "First week",
+      "days": [
+        {
+          "name": "Monday",
+          "events": [
+            {
+              "name": "Call this event as you want!",
+              "description": "Describe this event!",
+              "in_day": "Monday",
+              "start_time": [9, 0],
+              "end_time": [10, 30]
+            }
+          ]
+        },
+        {
+          "name": "Tuesday",
+          "events": []
+        },
+        {
+          "name": "Wednesday",
+          "events": []
+        },
+        {
+          "name": "Thursday",
+          "events": []
+        },
+        {
+          "name": "Friday",
+          "events": []
+        },
+        {
+          "name": "Saturday",
+          "events": []
+        },
+        {
+          "name": "Sunday",
+          "events": []
+        }
+      ]
+    }
+  ]
+}
