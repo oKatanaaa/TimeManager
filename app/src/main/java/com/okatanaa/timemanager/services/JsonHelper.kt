@@ -59,8 +59,9 @@ class JsonHelper {
             val jsonEventArray = json.getJSONArray(JSON_EVENTS)
 
             val eventList = arrayListOf<Event>()
+            val day = Day(eventList, dayName)
             for (i in 0 until jsonEventArray.length()) {
-                eventList.add(eventFromJson(jsonEventArray[i] as JSONObject))
+                day.addEvent(eventFromJson(jsonEventArray[i] as JSONObject))
             }
             return Day(eventList, dayName)
         }
@@ -68,13 +69,13 @@ class JsonHelper {
 
         fun eventFromJson(json: JSONObject): Event {
             val eventName = json.getString(JSON_NAME)
-            val eventDescription = json.getString(JSON_DESCRIPTION)
+            val eventDescription = json.getString(JSON_EVENT_DESCRIPTION)
             val eventInDay = json.getString(JSON_IN_DAY)
-            val startTimeJsonArray = json.getJSONArray(JSON_START_TIME)
+            val startTimeJsonArray = json.getJSONArray(JSON_EVENT_START_TIME)
             val startTime = arrayListOf(startTimeJsonArray[0] as Int, startTimeJsonArray[1] as Int)
-            val endTimeJsonArray = json.getJSONArray(JSON_END_TIME)
+            val endTimeJsonArray = json.getJSONArray(JSON_EVENT_END_TIME)
             val endTime = arrayListOf(endTimeJsonArray[0] as Int, endTimeJsonArray[1] as Int)
-            return Event(eventName, eventDescription, startTime, endTime, eventInDay)
+            return Event(eventName, eventDescription, startTime, endTime, Day(title = eventInDay))
         }
 
         fun weekToJson(week: Week): JSONObject {
@@ -105,18 +106,18 @@ class JsonHelper {
         fun eventToJson(event: Event): JSONObject {
             val json = JSONObject()
             json.put(JSON_NAME, event.name)
-            json.put(JSON_DESCRIPTION, event.description)
-            json.put(JSON_IN_DAY, event.inDay)
+            json.put(JSON_EVENT_DESCRIPTION, event.description)
+            json.put(JSON_IN_DAY, event.inDay.toString())
 
             val jsonArrayStartTime = JSONArray()
             jsonArrayStartTime.put(event.startTime[0])
             jsonArrayStartTime.put(event.startTime[1])
-            json.put(JSON_START_TIME, jsonArrayStartTime)
+            json.put(JSON_EVENT_START_TIME, jsonArrayStartTime)
 
             val jsonArrayEndTime = JSONArray()
             jsonArrayEndTime.put(event.endTime[0])
             jsonArrayEndTime.put(event.endTime[1])
-            json.put(JSON_END_TIME, jsonArrayEndTime)
+            json.put(JSON_EVENT_END_TIME, jsonArrayEndTime)
 
             return json
         }

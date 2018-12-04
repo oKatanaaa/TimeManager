@@ -5,14 +5,13 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.okatanaa.timemanager.R
+import com.okatanaa.timemanager.controller.MainActivity
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
+import kotlin.system.exitProcess
 
 
 /*
@@ -32,7 +31,22 @@ import com.okatanaa.timemanager.model.Week
 *
 * MainActivity -> WeekRecycleAdapter -> DayListAdapter
  */
-class WeekRecycleAdapter(val context: Context, val week: Week, val eventClick: (Event) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.Adapter<WeekRecycleAdapter.Holder>() {
+class WeekRecycleAdapter(val context: Context, val week: Week,
+                         val eventClick: (Event, DayListAdapter) -> Unit,
+                         val addEventClick: (Day) -> Unit,
+                         val eventLongClick: (parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long) -> Boolean)
+    : RecyclerView.Adapter<WeekRecycleAdapter.Holder>() {
+
+    private val dayMap = mapOf(
+        Pair("Monday", 0),
+        Pair("Tuesday", 1),
+        Pair("Wednesday", 2),
+        Pair("Thursday", 3),
+        Pair("Friday", 4),
+        Pair("Saturday", 5),
+        Pair("Sunday", 6)
+    )
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(context)
             .inflate(R.layout.week_item, parent, false)
@@ -48,16 +62,18 @@ class WeekRecycleAdapter(val context: Context, val week: Week, val eventClick: (
         holder?.bindDay(week.getDay(position), context)
     }
 
-    inner class Holder(itemView: View, val eventClick: (Event) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.ViewHolder(itemView) {
+    inner class Holder(itemView: View, val eventClick: (Event, DayListAdapter) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.ViewHolder(itemView) {
         val dayName = itemView?.findViewById<TextView>(R.id.day_name)
         val dayListView = itemView?.findViewById<ListView>(R.id.eventListView)
         val eventAddBtn = itemView?.findViewById<Button>(R.id.addEventBtn)
 
         fun bindDay(day: Day, context: Context) {
-            dayListView?.adapter = DayListAdapter(context, day, eventClick)
+            val adapter = DayListAdapter(context, day, eventClick)
+            dayListView?.adapter = adapter
+            dayListView.setOnItemLongClickListener { parent, view, position, id ->  eventLongClick(parent as AdapterView<DayListAdapter>, view, position, id)}
             dayName?.text = day.title
-
             eventAddBtn.setOnClickListener { addEventClick(day) }
+            
         }
     }
 }

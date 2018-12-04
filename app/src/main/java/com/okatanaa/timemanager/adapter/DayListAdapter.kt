@@ -10,7 +10,7 @@ import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 
-class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event) -> Unit) : BaseAdapter() {
+class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event, DayListAdapter) -> Unit) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val eventView: View
@@ -28,7 +28,6 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event)
             eventView = convertView
         }
 
-
         val event = day.getEvent(position)
         holder.eventNameTxt?.text = event.name
         holder.startTimeTxt?.text = "${event.startTime[0].toString()}:${event.startTime[1]}"
@@ -37,7 +36,8 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event)
         // Make events in the list clickable!
         // We need to update listener each time because otherwise
         // event activity would get another event(not one you clicked on)
-        eventView.setOnClickListener { eventClick(event) }
+        eventView.setOnClickListener { eventClick(event, this) }
+        eventView.isLongClickable = true
 
         return eventView
     }
@@ -45,6 +45,7 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event)
     override fun getItem(position: Int): Any {
         return day.getEvent(position)
     }
+
 
     override fun getItemId(position: Int): Long {
         return 0

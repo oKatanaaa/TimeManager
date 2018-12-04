@@ -4,7 +4,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Event
-import com.okatanaa.timemanager.utilities.EXTRA_EVENT_JSON
 import kotlinx.android.synthetic.main.activity_event.*
 import android.app.Activity
 import android.content.Intent
@@ -17,8 +16,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import com.okatanaa.timemanager.additional_classes.TextClickedListener
 import com.okatanaa.timemanager.services.JsonHelper
-import com.okatanaa.timemanager.utilities.EXTRA_EDITED_NAME
-import com.okatanaa.timemanager.utilities.EXTRA_EDITED_VALUE
+import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.content_event.*
 import org.json.JSONObject
 
@@ -38,12 +36,12 @@ class EventActivity : AppCompatActivity() {
         val eventJson = JSONObject(eventJsonString)
         event = JsonHelper.eventFromJson(eventJson)
 
-        eventNameTxt.setText(event.name)
+        eventNameTxt.text = event.name
         eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, "Event Name", eventNameTxt.text.toString())}
 
         eventDescriptionTxt.text = event.description
         eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, "Description", eventDescriptionTxt.text.toString())}
-        inWhatDayTxt.text = event.inDay
+        inWhatDayTxt.text = event?.inDay.toString()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -64,7 +62,8 @@ class EventActivity : AppCompatActivity() {
 
     fun actionDeleteEvent(): Boolean {
         val resultIntent = Intent()
-        setResult(Activity.RESULT_CANCELED, resultIntent)
+        resultIntent.putExtra(EXTRA_ACTION, ACTION_DELETE)
+        setResult(Activity.RESULT_OK, resultIntent)
         println("Finish")
         finish()
         return true
@@ -76,6 +75,7 @@ class EventActivity : AppCompatActivity() {
         event.description = eventDescriptionTxt.text.toString()
         val resultIntent = Intent()
         resultIntent.putExtra(EXTRA_EVENT_JSON, JsonHelper.eventToJson(event).toString())
+        resultIntent.putExtra(EXTRA_ACTION, ACTION_SAVE)
         setResult(Activity.RESULT_OK, resultIntent)
         println("Finish")
         finish()

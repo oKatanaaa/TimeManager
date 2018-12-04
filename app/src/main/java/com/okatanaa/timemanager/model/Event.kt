@@ -9,13 +9,13 @@ class Event {
     var description: String
     var startTime: ArrayList<Int>
     var endTime: ArrayList<Int>
-    var inDay: String
+    lateinit var inDay: Day
 
     constructor(name: String = "Empty event",
                 description: String = "",
                 startTime: ArrayList<Int> = arrayListOf(0,0),
                 endTime: ArrayList<Int> = arrayListOf(0,0),
-                inDay: String = "") {
+                inDay: Day = Day(title = "No day")) {
         this.name = name
         this.description = description
         this.startTime = startTime
@@ -33,12 +33,22 @@ class Event {
     }
 
     // This function is called only after adding event in a particular day
-    fun setDay(dayName: String) {
-        this.inDay = "In day: $dayName"
+    fun setDay(day: Day) {
+        this.inDay = day
     }
 
     override fun toString(): String {
         return name
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other !is Event)
+            return false
+
+        return this.name == other.name &&
+                this.description == other.description &&
+                this.startTime == other.startTime &&
+                this.endTime == other.endTime
     }
 
 }

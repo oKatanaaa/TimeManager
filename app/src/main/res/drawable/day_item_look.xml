@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <solid
-            android:color="#ffffff"
-    />
-
-    <stroke
-            android:width="0.1dp"
-            android:color="#8c8c8c"
-    />
-
-    <corners
-            android:radius="3dp"
-    />
-
-</shape>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:drawable="@drawable/day_item_selected"/>
+    <item android:state_selected="false" android:drawable="@drawable/day_item_not_selected"/>
+</selector>
