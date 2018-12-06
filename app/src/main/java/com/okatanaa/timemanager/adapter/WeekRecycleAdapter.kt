@@ -13,6 +13,7 @@ import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
+import kotlinx.android.synthetic.main.week_item.view.*
 import kotlin.system.exitProcess
 
 
@@ -61,7 +62,10 @@ class WeekRecycleAdapter(val context: Context, val week: Week,
         val eventAddBtn = itemView?.findViewById<Button>(R.id.addEventBtn)
 
         fun bindDay(day: Day, context: Context, onEventClickListener: OnEventClickListener) {
-            dayName?.text = day.title
+            dayName?.text = "${day.title}, ${day.todaysDate} ${day.month}"
+
+            if(day.isToday)
+                this.itemView.dayLayout.setBackgroundResource(R.drawable.week_item_today_look)
 
             val adapter = DayListAdapter(context, day, onEventClickListener)
             dayListView?.adapter = adapter

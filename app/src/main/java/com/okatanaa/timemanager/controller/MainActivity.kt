@@ -1,5 +1,6 @@
 package com.okatanaa.timemanager.controller
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.adapter.DayListAdapter
 import com.okatanaa.timemanager.adapter.WeekRecycleAdapter
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
+import com.okatanaa.timemanager.model.CalendarSynchronizer
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.JsonHelper
@@ -23,35 +25,28 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), OnEventClickListener{
-
-    override fun onEventClicked(event: Event, adapter: DayListAdapter, position: Int) {
-        println("Event clicked!")
-        this.modifyingEvent = event
-        this.modifyingEventPosition = position
-        this.modifyingAdapter = adapter
-        val eventIntent = Intent(this@MainActivity, EventActivity::class.java)
-        val eventJson = JsonHelper.eventToJson(event)
-        eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
-        startActivityForResult(eventIntent, 0)
-    }
-
-
+    // Permanent data
     lateinit var weekAdapter: WeekRecycleAdapter
+    lateinit var week: Week
+    lateinit var calendarSynchronizer: CalendarSynchronizer
+
+    // Data for modifying events
     lateinit var modifyingEvent: Event
     var modifyingEventPosition: Int = 0
     lateinit var modifyingAdapter: DayListAdapter
-    lateinit var week: Week
 
     // Data for move buttons
     lateinit var listView: AdapterView<DayListAdapter>
     var eventPosition: Int = 0
 
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        // Read week from json
-        println("Read week")
+
         this.week = JsonHelper.readFirstWeekFromJson(JsonHelper.readJSON(this))
+        this.calendarSynchronizer = CalendarSynchronizer(this.week)
+
         setWeekRecycleAdapter()
         setMoveButtons()
     }
@@ -132,6 +127,17 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
         }
         this.listView.adapter.addSelectedView(this.eventPosition)
         this.listView.adapter.notifyDataSetChanged()
+    }
+
+    override fun onEventClicked(event: Event, adapter: DayListAdapter, position: Int) {
+        println("Event clicked!")
+        this.modifyingEvent = event
+        this.modifyingEventPosition = position
+        this.modifyingAdapter = adapter
+        val eventIntent = Intent(this@MainActivity, EventActivity::class.java)
+        val eventJson = JsonHelper.eventToJson(event)
+        eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
+        startActivityForResult(eventIntent, 0)
     }
 
     fun saveData() {

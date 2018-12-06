@@ -7,6 +7,9 @@ import android.widget.SpinnerAdapter
 class Day {
     private var events: ArrayList<Event>
     var title: String
+    lateinit var month: String
+    var todaysDate = 0
+    var isToday = false
 
     constructor(events: ArrayList<Event> =
                 arrayListOf(), title: String) {

@@ -12,6 +12,7 @@ import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
+import kotlinx.android.synthetic.main.day_item.view.*
 
 class DayListAdapter(val context: Context, val day: Day, val onEventClickListener: OnEventClickListener) : BaseAdapter() {
     val selectedViews: MutableSet<Int> = mutableSetOf()
@@ -44,9 +45,10 @@ class DayListAdapter(val context: Context, val day: Day, val onEventClickListene
         eventView.setOnClickListener { onEventClickListener.onEventClicked(event, this, position) }
         eventView.isLongClickable = true
         if(this.selectedViews.contains(position))
-            eventView.setBackgroundResource(R.drawable.day_item_selected)
+            eventView.dayItemLayout.setBackgroundResource(R.drawable.day_item_selected)
         else
-            eventView.setBackgroundResource(R.drawable.day_item_not_selected)
+            eventView.dayItemLayout.setBackgroundResource(R.drawable.day_item_not_selected)
+
         println("Event position ${position} isSelected: ${eventView.isSelected} setContains: ${this.selectedViews.contains(position)}")
 
         return eventView
