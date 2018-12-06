@@ -17,15 +17,15 @@
               "name": "Call this event as you want1!",
               "description": "Describe this event!",
               "in_day": "Monday",
-              "start_time": [9, 0],
-              "end_time": [10, 30]
+              "start_time": [10, 31],
+              "end_time": [11, 30]
             },
             {
               "name": "Call this event as you want2!\nCall this event as you want2!\nCall this event as you want2!\nCall this event as you want2!\nCall this event as you want2!Call this event as you want2!Call this event as you want2!",
               "description": "Describe this event!",
               "in_day": "Monday",
-              "start_time": [9, 0],
-              "end_time": [10, 30]
+              "start_time": [12, 0],
+              "end_time": [13, 30]
             }
           ]
         },

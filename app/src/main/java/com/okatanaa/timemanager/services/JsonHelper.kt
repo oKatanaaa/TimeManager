@@ -61,7 +61,7 @@ class JsonHelper {
             val eventList = arrayListOf<Event>()
             val day = Day(eventList, dayName)
             for (i in 0 until jsonEventArray.length()) {
-                day.addEvent(eventFromJson(jsonEventArray[i] as JSONObject))
+                day.addExistingEvent(eventFromJson(jsonEventArray[i] as JSONObject))
             }
             return Day(eventList, dayName)
         }
@@ -110,13 +110,13 @@ class JsonHelper {
             json.put(JSON_IN_DAY, event.inDay.toString())
 
             val jsonArrayStartTime = JSONArray()
-            jsonArrayStartTime.put(event.startTime[0])
-            jsonArrayStartTime.put(event.startTime[1])
+            jsonArrayStartTime.put(event.startTimeArr[0])
+            jsonArrayStartTime.put(event.startTimeArr[1])
             json.put(JSON_EVENT_START_TIME, jsonArrayStartTime)
 
             val jsonArrayEndTime = JSONArray()
-            jsonArrayEndTime.put(event.endTime[0])
-            jsonArrayEndTime.put(event.endTime[1])
+            jsonArrayEndTime.put(event.endTimeArr[0])
+            jsonArrayEndTime.put(event.endTimeArr[1])
             json.put(JSON_EVENT_END_TIME, jsonArrayEndTime)
 
             return json

@@ -12,6 +12,8 @@ const val EXTRA_EVENT_JSON = "event_json"
 const val EXTRA_EDITED_NAME = "edited_name"
 const val EXTRA_EDITED_VALUE = "edited_value"
 const val EXTRA_ACTION = "action"
+const val EXTRA_TOP_TIME_BORDER = "top time border"
+const val EXTRA_BOTTOM_TIME_BORDER = "bottom time border"
 // JSON DATA
 const val JSON_NAME = "name"
 const val JSON_EVENT_DESCRIPTION = "description"

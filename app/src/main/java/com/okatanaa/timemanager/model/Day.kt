@@ -17,41 +17,72 @@ class Day {
         this.title = title
     }
 
-    fun addEvent(event: Event) {
+
+    @Synchronized fun addNewEvent(event: Event): Boolean {
+        if(this.eventCount() == 0) {
+            event.setDay(this)
+            event.smartSetStartTime(Time(0))
+            event.smartSetEndTime(Time(30))
+            this.events.add(event)
+            return true
+        }
+
+        if(this.events[this.eventCount() - 1].endTime.toMinutes() == Time.MINUTES_IN_DAY)
+            return false
+
         event.setDay(this)
+
+        val aboveEvent = this.events[this.eventCount() - 1]
+        val startTimeInMinutes = aboveEvent.endTime.toMinutes()
+
+        event.smartSetStartTime(Time(startTimeInMinutes))
+        if(startTimeInMinutes + 30 > Time.MINUTES_IN_DAY)
+            event.smartSetEndTime(Time(Time.MINUTES_IN_DAY))
+        else
+            event.smartSetEndTime(Time(startTimeInMinutes + 30))
+
         events.add(event)
+        return true
     }
 
-    fun deleteEvent(index: Int) {
+    @Synchronized fun addExistingEvent(event: Event): Boolean {
+        event.setDay(this)
+        events.add(event)
+        return true
+    }
+
+    @Synchronized fun deleteEvent(index: Int) {
         if(events.size == 0)
             throw ArrayIndexOutOfBoundsException("Day is empty.")
 
         events.removeAt(index)
     }
 
-    fun moveEventUp(currentPos: Int): Boolean {
+    @Synchronized fun moveEventUp(currentPos: Int): Boolean {
         if(currentPos == 0)
             return false
 
-        val movingEvent = events.removeAt(currentPos)
-        events.add(currentPos - 1, movingEvent)
+        val movingEvent = events[currentPos]
+        val aboveEvent = events[currentPos - 1]
+        movingEvent.swapWithoutTimeCopy(aboveEvent)
         return true
     }
 
-    fun moveEventDown(currentPos: Int): Boolean {
+    @Synchronized fun moveEventDown(currentPos: Int): Boolean {
         if(currentPos == events.size - 1)
             return false
 
-        val movingEvent = events.removeAt(currentPos)
-        events.add(currentPos + 1, movingEvent)
+        val movingEvent = events[currentPos]
+        val belowEvent = events[currentPos + 1]
+        movingEvent.swapWithoutTimeCopy(belowEvent)
         return true
     }
 
-    fun getEvent(index: Int): Event {
+    @Synchronized fun getEvent(index: Int): Event {
         return events[index]
     }
 
-    fun getPosition(event: Event): Int {
+    @Synchronized fun getPosition(event: Event): Int {
         var position: Int = 0
         for (i in 0 until eventCount())
             if(event.equals(this.events[i]))
@@ -60,11 +91,11 @@ class Day {
         return position
     }
 
-    fun eventCount(): Int {
+    @Synchronized fun eventCount(): Int {
         return events.count()
     }
 
-    override fun toString(): String {
+    @Synchronized override fun toString(): String {
         return this.title
     }
 }

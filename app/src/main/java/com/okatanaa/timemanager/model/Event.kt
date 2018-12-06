@@ -1,15 +1,16 @@
 package com.okatanaa.timemanager.model
 
-import android.os.Parcel
-import android.os.Parcelable
-
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class Event {
     var name: String
     var description: String
-    var startTime: ArrayList<Int>
-    var endTime: ArrayList<Int>
+    var startTimeArr: ArrayList<Int>
+    var endTimeArr: ArrayList<Int>
     lateinit var inDay: Day
+    var isCurrent = false
+
+    lateinit var startTime: Time
+    lateinit var endTime: Time
 
     constructor(name: String = "Empty event",
                 description: String = "",
@@ -18,23 +19,53 @@ class Event {
                 inDay: Day = Day(title = "No day")) {
         this.name = name
         this.description = description
-        this.startTime = startTime
-        this.endTime = endTime
+        this.startTimeArr = startTime
+        this.endTimeArr = endTime
         this.inDay = inDay
+
+        this.startTime = Time(this.startTimeArr[0], this.startTimeArr[1])
+        this.endTime = Time(this.endTimeArr[0], this.endTimeArr[1])
     }
 
 
-    fun copy(other: Event) {
+    fun copy(other: Event): Event {
         this.name = other.name
         this.description = other.description
-        this.startTime = other.startTime.clone() as ArrayList<Int>
-        this.endTime = other.endTime.clone() as ArrayList<Int>
+        this.startTimeArr = other.startTimeArr.clone() as ArrayList<Int>
+        this.endTimeArr = other.endTimeArr.clone() as ArrayList<Int>
         this.inDay = other.inDay
+        this.startTime = Time(this.startTimeArr)
+        this.endTime = Time(this.endTimeArr)
+        return this
     }
 
     // This function is called only after adding event in a particular day
     fun setDay(day: Day) {
         this.inDay = day
+    }
+
+    fun smartSetStartTime(startTime: Time) {
+        this.startTime = startTime
+        this.startTimeArr[0] = startTime.hours
+        this.startTimeArr[1] = startTime.minutes
+    }
+
+    fun smartSetEndTime(endTime: Time) {
+        this.endTime = endTime
+        this.endTimeArr[0] = endTime.hours
+        this.endTimeArr[1] = endTime.minutes
+    }
+
+    fun swapWithoutTimeCopy(other: Event) {
+        val temp = Event().copy(other)
+        other.copy(this)
+        other.smartSetStartTime(temp.startTime)
+        other.smartSetEndTime(temp.endTime)
+        val oldStartTime = this.startTime
+        val oldEndTime = this.endTime
+        this.copy(temp)
+        this.smartSetStartTime(oldStartTime)
+        this.smartSetEndTime(oldEndTime)
     }
 
     override fun toString(): String {
@@ -47,8 +78,8 @@ class Event {
 
         return this.name == other.name &&
                 this.description == other.description &&
-                this.startTime == other.startTime &&
-                this.endTime == other.endTime
+                this.startTimeArr == other.startTimeArr &&
+                this.endTimeArr == other.endTimeArr
     }
 
 }

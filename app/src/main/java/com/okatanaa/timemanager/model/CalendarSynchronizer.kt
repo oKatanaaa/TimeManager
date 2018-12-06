@@ -1,14 +1,14 @@
 package com.okatanaa.timemanager.model
 
-import android.annotation.SuppressLint
 import android.icu.util.Calendar
 import android.os.Build
 import android.support.annotation.RequiresApi
+import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import java.time.LocalDate
 import kotlin.IllegalArgumentException
 
 @RequiresApi(Build.VERSION_CODES.O)
-class CalendarSynchronizer(val week: Week) {
+class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEventChangedListener) {
 
     @RequiresApi(Build.VERSION_CODES.N)
     val calendar = Calendar.getInstance()
@@ -19,9 +19,12 @@ class CalendarSynchronizer(val week: Week) {
     var currentMonthNum = 0
     var todaysDate = 0
 
+    lateinit var synchronizedDay: Day
+
     init {
         setData()
         synchronize()
+        startSynchronizingThread()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -41,6 +44,12 @@ class CalendarSynchronizer(val week: Week) {
         setCurrentWeekDay()
         setCurrentMonth()
         this.todaysDate = this.calendar.get(Calendar.DAY_OF_MONTH)
+        this.synchronizedDay = this.week.getDay(this.currentWeekDayNum)
+    }
+
+    fun startSynchronizingThread() {
+        DaySyncronizer(this.eventChangedListener).start()
+        println("Thread started")
     }
 
     private fun setCurrentWeekDay() {
@@ -109,6 +118,43 @@ class CalendarSynchronizer(val week: Week) {
         else -> throw IllegalArgumentException("Unknown month!")
     }
 
+    inner class DaySyncronizer(val eventChangedListener: CurrentEventChangedListener): Thread() {
+        override fun run() {
+            val currentDay = this@CalendarSynchronizer.synchronizedDay
+            var currentEvent: Event? = null
+            var currentEventExists = false
+            while(true) {
+                val currentHours = this@CalendarSynchronizer.calendar.get(Calendar.HOUR_OF_DAY)
+                val currentMinutes = this@CalendarSynchronizer.calendar.get(Calendar.MINUTE)
+                val currentTime = Time(currentHours, currentMinutes)
+                    synchronized(currentDay) {
+                    for(i in 0 until currentDay.eventCount()) {
+                        val event = currentDay.getEvent(i)
 
+                        event.isCurrent = currentTime.isBetween(event.startTime, event.endTime)
+                        currentEventExists = event.isCurrent
+
+                        if(currentEventExists && currentEvent == null) {
+                            this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                            currentEvent = event
+                            break
+                        } else if (currentEventExists && !currentEvent?.equals(event)!!) {
+                            this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                            currentEvent = event
+                            break
+                        }
+                    }
+                }
+
+                if(!currentEventExists && currentEvent != null) {
+                    currentEvent = null
+                    this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                }
+
+                 sleep(500)
+            }
+
+        }
+    }
 
 }

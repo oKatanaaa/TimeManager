@@ -8,15 +8,19 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.adapter.DayListAdapter
 import com.okatanaa.timemanager.adapter.WeekRecycleAdapter
+import com.okatanaa.timemanager.adapter.WeekRecycleAdapter.Holder
+import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.CalendarSynchronizer
 import com.okatanaa.timemanager.model.Event
+import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.*
@@ -24,7 +28,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import org.json.JSONObject
 
-class MainActivity : AppCompatActivity(), OnEventClickListener{
+class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChangedListener{
     // Permanent data
     lateinit var weekAdapter: WeekRecycleAdapter
     lateinit var week: Week
@@ -45,10 +49,11 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
         setContentView(R.layout.activity_main)
 
         this.week = JsonHelper.readFirstWeekFromJson(JsonHelper.readJSON(this))
-        this.calendarSynchronizer = CalendarSynchronizer(this.week)
+        this.calendarSynchronizer = CalendarSynchronizer(this.week, this)
 
         setWeekRecycleAdapter()
         setMoveButtons()
+        weekRecycleView.scrollToPosition(this.calendarSynchronizer.currentWeekDayNum)
     }
 
     fun setWeekRecycleAdapter() {
@@ -62,6 +67,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         weekRecycleView.layoutManager = layoutManager
         weekRecycleView.setHasFixedSize(true)
+        (weekRecycleView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     }
 
     fun setMoveButtons() {
@@ -85,10 +91,13 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
             val changedEvent = JsonHelper.eventFromJson(changedEventJson)
             // Change picked event data to received data
             this.modifyingEvent.copy(changedEvent)
+            this.modifyingAdapter.notifyDataSetChanged()
         }
 
         if(data?.getStringExtra(EXTRA_ACTION) == ACTION_DELETE) {
-            this.modifyingAdapter.day.deleteEvent(this.modifyingEventPosition)
+            synchronized(this.modifyingAdapter.day) {
+                this.modifyingAdapter.day.deleteEvent(this.modifyingEventPosition)
+            }
             this.modifyingAdapter.notifyDataSetChanged()
         }
 
@@ -106,8 +115,10 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
 
     fun onClickedMoveUpBtn(view: View) {
         this.listView.adapter.removeSelectedView(this.eventPosition)
-        if(this.listView.adapter.day.moveEventUp(this.eventPosition)) {
-            this.eventPosition = this.eventPosition - 1
+        synchronized(this.listView.adapter.day) {
+            if (this.listView.adapter.day.moveEventUp(this.eventPosition)) {
+                this.eventPosition = this.eventPosition - 1
+            }
         }
         this.listView.adapter.addSelectedView(this.eventPosition)
         this.listView.adapter.notifyDataSetChanged()
@@ -122,8 +133,10 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
 
     fun onClickedMoveDownBtn(view: View) {
         this.listView.adapter.removeSelectedView(this.eventPosition)
-        if(this.listView.adapter.day.moveEventDown(this.eventPosition)) {
-            this.eventPosition = this.eventPosition + 1
+        synchronized(this.listView.adapter.day) {
+            if (this.listView.adapter.day.moveEventDown(this.eventPosition)) {
+                this.eventPosition = this.eventPosition + 1
+            }
         }
         this.listView.adapter.addSelectedView(this.eventPosition)
         this.listView.adapter.notifyDataSetChanged()
@@ -134,10 +147,46 @@ class MainActivity : AppCompatActivity(), OnEventClickListener{
         this.modifyingEvent = event
         this.modifyingEventPosition = position
         this.modifyingAdapter = adapter
+
+        var topTimeBorder: Int = 0
+        var bottomTimeBorder: Int = Time.MINUTES_IN_DAY
+
+        // There is the only event in day
+        if(position == 0 && adapter.count == 1) {
+            topTimeBorder = 0
+            bottomTimeBorder = Time.MINUTES_IN_DAY
+        }
+        // This event is first, but there is other events
+        else if(position == 0 && adapter.count > 1) {
+            val belowEvent = adapter.getItem(position + 1) as Event
+            topTimeBorder = 0
+            bottomTimeBorder = belowEvent.startTime.toMinutes()
+        }
+        // There are many events and this event is somewhere in the middle of list
+        else if(position != 0 && position < adapter.count - 1) {
+            val aboveEvent = adapter.getItem(position - 1) as Event
+            val belowEvent = adapter.getItem(position + 1) as Event
+            topTimeBorder = aboveEvent.endTime.toMinutes()
+            bottomTimeBorder = belowEvent.startTime.toMinutes()
+        }
+        // There are many events and this event is the last one
+        else if(position == adapter.count - 1) {
+            val aboveEvent = adapter.getItem(position - 1) as Event
+            topTimeBorder = aboveEvent.endTime.toMinutes()
+            bottomTimeBorder = Time.MINUTES_IN_DAY
+        }
+
         val eventIntent = Intent(this@MainActivity, EventActivity::class.java)
         val eventJson = JsonHelper.eventToJson(event)
+
         eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
+        eventIntent.putExtra(EXTRA_TOP_TIME_BORDER, topTimeBorder)
+        eventIntent.putExtra(EXTRA_BOTTOM_TIME_BORDER, bottomTimeBorder)
         startActivityForResult(eventIntent, 0)
+    }
+
+    override fun currentEventChanged(dayPosition: Int) {
+        this.weekAdapter.notifyItemChanged(dayPosition)
     }
 
     fun saveData() {

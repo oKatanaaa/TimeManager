@@ -10,15 +10,14 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import com.okatanaa.timemanager.additional_classes.TextClickedListener
+import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.content_event.*
 import org.json.JSONObject
+import kotlin.math.round
 
 
 class EventActivity : AppCompatActivity() {
@@ -27,21 +26,57 @@ class EventActivity : AppCompatActivity() {
     val EVENT_NAME = "Event Name"
     val DESCRIPTION = "Description"
 
+    var topTimeBorder = 0
+    var bottomTimeBorder = Time.MINUTES_IN_DAY
+
+    var currentStartTime = 0
+    var currentEndTime = Time.MINUTES_IN_DAY
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event)
         setSupportActionBar(toolbar)
+        setEventData()
+        setTextViews()
+        setTimeBars()
+        setTimeBarListeners()
+    }
 
+    fun setEventData() {
         val eventJsonString = intent.getStringExtra(EXTRA_EVENT_JSON)
         val eventJson = JSONObject(eventJsonString)
-        event = JsonHelper.eventFromJson(eventJson)
+        this.event = JsonHelper.eventFromJson(eventJson)
+        this.topTimeBorder = intent.getIntExtra(EXTRA_TOP_TIME_BORDER, this.topTimeBorder)
+        this.bottomTimeBorder = intent.getIntExtra(EXTRA_BOTTOM_TIME_BORDER, this.bottomTimeBorder)
+        this.currentStartTime = event.startTime.toMinutes()
+        this.currentEndTime = event.endTime.toMinutes()
+    }
 
+    fun setTextViews() {
         eventNameTxt.text = event.name
-        eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, "Event Name", eventNameTxt.text.toString())}
+        eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, this.EVENT_NAME, eventNameTxt.text.toString())}
 
         eventDescriptionTxt.text = event.description
-        eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, "Description", eventDescriptionTxt.text.toString())}
+        eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, this.DESCRIPTION, eventDescriptionTxt.text.toString())}
         inWhatDayTxt.text = event?.inDay.toString()
+
+        startTimeDynamicTxt.text = this.event.startTime.toString()
+        endTimeDynamicTxt.text = this.event.endTime.toString()
+    }
+
+    fun setTimeBars() {
+        startTimeBar.progress = ((1.0 * (this.currentStartTime - this.topTimeBorder) / (this.currentEndTime - this.topTimeBorder)) * 100).toInt()
+        endTimeBar.progress = ((1.0 * (this.currentEndTime - this.currentStartTime) / (this.bottomTimeBorder - this.currentStartTime)) * 100).toInt()
+    }
+
+    fun setTimeBarListeners() {
+        startTimeBar.setOnSeekBarChangeListener(StartTimeBarListener())
+        endTimeBar.setOnSeekBarChangeListener(EndTimeBarListener())
+    }
+
+    fun updateTimeFields() {
+        startTimeDynamicTxt.text = Time(this.currentStartTime).toString()
+        endTimeDynamicTxt.text = Time(this.currentEndTime).toString()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -73,6 +108,8 @@ class EventActivity : AppCompatActivity() {
         // Save changed data
         event.name = eventNameTxt.text.toString()
         event.description = eventDescriptionTxt.text.toString()
+        event.smartSetStartTime(Time(this.currentStartTime))
+        event.smartSetEndTime(Time(this.currentEndTime))
         val resultIntent = Intent()
         resultIntent.putExtra(EXTRA_EVENT_JSON, JsonHelper.eventToJson(event).toString())
         resultIntent.putExtra(EXTRA_ACTION, ACTION_SAVE)
@@ -100,6 +137,36 @@ class EventActivity : AppCompatActivity() {
         super.onDestroy()
         setResult(Activity.RESULT_CANCELED, Intent())
         finish()
+    }
+
+    inner class StartTimeBarListener: SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            val timeBetweenCurrentAndTop = this@EventActivity.currentEndTime - this@EventActivity.topTimeBorder
+            this@EventActivity.currentStartTime = this@EventActivity.topTimeBorder + (timeBetweenCurrentAndTop * 1.0 * progress / 100.0).toInt()
+            this@EventActivity.updateTimeFields()
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        }
+
+    }
+
+    inner class EndTimeBarListener: SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            val timeBetweenCurrentAndBot = this@EventActivity.bottomTimeBorder - this@EventActivity.currentStartTime
+            this@EventActivity.currentEndTime = this@EventActivity.currentStartTime + (timeBetweenCurrentAndBot * 1.0 * progress / 100.0).toInt()
+            this@EventActivity.updateTimeFields()
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        }
+
     }
 
 }

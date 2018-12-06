@@ -7,14 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.okatanaa.timemanager.R
-import com.okatanaa.timemanager.controller.MainActivity
-import com.okatanaa.timemanager.interfaces.AddEventClickListener
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
 import kotlinx.android.synthetic.main.week_item.view.*
-import kotlin.system.exitProcess
 
 
 /*
@@ -58,8 +55,9 @@ class WeekRecycleAdapter(val context: Context, val week: Week,
 
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dayName = itemView?.findViewById<TextView>(R.id.day_name)
-        val dayListView = itemView?.findViewById<ListView>(R.id.eventListView)
+        public val dayListView = itemView?.findViewById<ListView>(R.id.eventListView)
         val eventAddBtn = itemView?.findViewById<Button>(R.id.addEventBtn)
+        var isBinded = false
 
         fun bindDay(day: Day, context: Context, onEventClickListener: OnEventClickListener) {
             dayName?.text = "${day.title}, ${day.todaysDate} ${day.month}"
@@ -73,11 +71,17 @@ class WeekRecycleAdapter(val context: Context, val week: Week,
 
             eventAddBtn.setOnClickListener{
                 val newEvent = Event("Event ${day.eventCount()}")
-                day.addEvent(newEvent)
+                day.addNewEvent(newEvent)
                 (dayListView.adapter as DayListAdapter).notifyDataSetChanged()
                 Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
             }
-            
+            isBinded = true
         }
+         fun updateWithPayLoad(payloads: MutableList<Any>) {
+             if(payloads.isEmpty())
+                 return
+
+             (dayListView.adapter as DayListAdapter).notifyDataSetChanged()
+         }
     }
 }
