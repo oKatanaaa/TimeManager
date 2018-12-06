@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.*
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.controller.MainActivity
+import com.okatanaa.timemanager.interfaces.AddEventClickListener
+import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
@@ -16,13 +18,13 @@ import kotlin.system.exitProcess
 
 /*
 *
-* eventClick parameter is a lambda, that I pass into adapter in order
+* eventClick parameter is a lambda, that I pass into weekAdapter in order
 * to create a onClickListener for events lie in the lists(days) in the MainActivity.
 * I need to do this to follow the ModelViewController pattern.
 * Other words - all the UI interaction logic must be in the controller, that is
 * MainActivity class. So I just declare the code that will be running at click event
-* in the MainActivity and than pass it into this adapter as an argument.
-* This adapter passes it into an inner adapter(for the lists of events) and
+* in the MainActivity and than pass it into this weekAdapter as an argument.
+* This weekAdapter passes it into an inner weekAdapter(for the lists of events) and
 * in them I implement this listener code for each element in the list.
 *
 * create onClickListener fun in MainActivity;
@@ -32,26 +34,17 @@ import kotlin.system.exitProcess
 * MainActivity -> WeekRecycleAdapter -> DayListAdapter
  */
 class WeekRecycleAdapter(val context: Context, val week: Week,
-                         val eventClick: (Event, DayListAdapter) -> Unit,
-                         val addEventClick: (Day) -> Unit,
+                         val onEventClickListener: OnEventClickListener,
                          val eventLongClick: (parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long) -> Boolean)
     : RecyclerView.Adapter<WeekRecycleAdapter.Holder>() {
 
-    private val dayMap = mapOf(
-        Pair("Monday", 0),
-        Pair("Tuesday", 1),
-        Pair("Wednesday", 2),
-        Pair("Thursday", 3),
-        Pair("Friday", 4),
-        Pair("Saturday", 5),
-        Pair("Sunday", 6)
-    )
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(context)
             .inflate(R.layout.week_item, parent, false)
 
-        return Holder(view, this.eventClick, this.addEventClick)
+        return Holder(view)
     }
 
     override fun getItemCount(): Int {
@@ -59,20 +52,27 @@ class WeekRecycleAdapter(val context: Context, val week: Week,
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder?.bindDay(week.getDay(position), context)
+        holder?.bindDay(week.getDay(position), context, onEventClickListener)
     }
 
-    inner class Holder(itemView: View, val eventClick: (Event, DayListAdapter) -> Unit, val addEventClick: (Day) -> Unit) : RecyclerView.ViewHolder(itemView) {
+    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dayName = itemView?.findViewById<TextView>(R.id.day_name)
         val dayListView = itemView?.findViewById<ListView>(R.id.eventListView)
         val eventAddBtn = itemView?.findViewById<Button>(R.id.addEventBtn)
 
-        fun bindDay(day: Day, context: Context) {
-            val adapter = DayListAdapter(context, day, eventClick)
-            dayListView?.adapter = adapter
-            dayListView.setOnItemLongClickListener { parent, view, position, id ->  eventLongClick(parent as AdapterView<DayListAdapter>, view, position, id)}
+        fun bindDay(day: Day, context: Context, onEventClickListener: OnEventClickListener) {
             dayName?.text = day.title
-            eventAddBtn.setOnClickListener { addEventClick(day) }
+
+            val adapter = DayListAdapter(context, day, onEventClickListener)
+            dayListView?.adapter = adapter
+            dayListView.setOnItemLongClickListener { parent, view, position, id ->  eventLongClick(parent as @kotlin.ParameterName(name = "parent") AdapterView<DayListAdapter>, view, position, id)}
+
+            eventAddBtn.setOnClickListener{
+                val newEvent = Event("Event ${day.eventCount()}")
+                day.addEvent(newEvent)
+                (dayListView.adapter as DayListAdapter).notifyDataSetChanged()
+                Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
+            }
             
         }
     }

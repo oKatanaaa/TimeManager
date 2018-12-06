@@ -10,12 +10,10 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
-import android.widget.ListView
-import android.widget.Toast
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.adapter.DayListAdapter
 import com.okatanaa.timemanager.adapter.WeekRecycleAdapter
-import com.okatanaa.timemanager.model.Day
+import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.JsonHelper
@@ -24,15 +22,25 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import org.json.JSONObject
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnEventClickListener{
 
-    lateinit var adapter: WeekRecycleAdapter
-    lateinit var modifiingEvent: Event
-    lateinit var modifiingAdapter: DayListAdapter
+    override fun onEventClicked(event: Event, adapter: DayListAdapter, position: Int) {
+        println("Event clicked!")
+        this.modifyingEvent = event
+        this.modifyingEventPosition = position
+        this.modifyingAdapter = adapter
+        val eventIntent = Intent(this@MainActivity, EventActivity::class.java)
+        val eventJson = JsonHelper.eventToJson(event)
+        eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
+        startActivityForResult(eventIntent, 0)
+    }
+
+
+    lateinit var weekAdapter: WeekRecycleAdapter
+    lateinit var modifyingEvent: Event
+    var modifyingEventPosition: Int = 0
+    lateinit var modifyingAdapter: DayListAdapter
     lateinit var week: Week
-
-    // This variable is inner class.
-    val outActivity = this
 
     // Data for move buttons
     lateinit var listView: AdapterView<DayListAdapter>
@@ -49,20 +57,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setWeekRecycleAdapter() {
-        this.adapter = WeekRecycleAdapter(this, this.week,
-            // Create lambda for the starting EventActivity
-            { event : Event, outerAdaper: DayListAdapter ->
-                CommonListener().onClickedEvent(event, outerAdaper)
-            },
-            // Create lambda for the adding new empty event
-            { day : Day ->
-                CommonListener().onClickedAddEventBtn(day)
-            },
-            { parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long ->
-                CommonListener().onLongClickedEvent(parent, view, position, id)
-            })
+        this.weekAdapter = WeekRecycleAdapter(this, this.week, this
+        ) { parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long ->
+            CommonListener().onLongClickedEvent(parent, view, position, id)
+        }
 
-        weekRecycleView.adapter = this.adapter
+        weekRecycleView.adapter = this.weekAdapter
 
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         weekRecycleView.layoutManager = layoutManager
@@ -89,16 +89,15 @@ class MainActivity : AppCompatActivity() {
             val changedEventJson = JSONObject(changedEventJsonString)
             val changedEvent = JsonHelper.eventFromJson(changedEventJson)
             // Change picked event data to received data
-            this.modifiingEvent.copy(changedEvent)
+            this.modifyingEvent.copy(changedEvent)
         }
 
         if(data?.getStringExtra(EXTRA_ACTION) == ACTION_DELETE) {
-            val position = this.modifiingEvent.inDay.getPosition(this.modifiingEvent)
-            this.modifiingAdapter.day.deleteEvent(position)
-            this.modifiingAdapter.notifyDataSetChanged()
+            this.modifyingAdapter.day.deleteEvent(this.modifyingEventPosition)
+            this.modifyingAdapter.notifyDataSetChanged()
         }
 
-        this.adapter.notifyDataSetChanged()
+        this.weekAdapter.notifyDataSetChanged()
         val scrollPosition = findViewById<RecyclerView>(R.id.weekRecycleView).scrollState
         weekRecycleView.layoutManager?.scrollHorizontallyBy(scrollPosition, weekRecycleView.Recycler(), RecyclerView.State())
         println("DONE")
@@ -111,16 +110,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickedMoveUpBtn(view: View) {
-
+        this.listView.adapter.removeSelectedView(this.eventPosition)
+        if(this.listView.adapter.day.moveEventUp(this.eventPosition)) {
+            this.eventPosition = this.eventPosition - 1
+        }
+        this.listView.adapter.addSelectedView(this.eventPosition)
+        this.listView.adapter.notifyDataSetChanged()
     }
 
+
     fun onClickedMoveDoneBtn(view: View) {
-        this.listView.getChildAt(this.eventPosition).isSelected = false
+        this.listView.adapter.removeAllSelectedViews()
+        this.listView.adapter.notifyDataSetChanged()
         setMoveButtons()
     }
 
     fun onClickedMoveDownBtn(view: View) {
-
+        this.listView.adapter.removeSelectedView(this.eventPosition)
+        if(this.listView.adapter.day.moveEventDown(this.eventPosition)) {
+            this.eventPosition = this.eventPosition + 1
+        }
+        this.listView.adapter.addSelectedView(this.eventPosition)
+        this.listView.adapter.notifyDataSetChanged()
     }
 
     fun saveData() {
@@ -134,30 +145,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class CommonListener {
-        fun onClickedEvent(event : Event, outerAdaper: DayListAdapter) {
-            println("Event clicked!")
-            modifiingEvent = event
-            modifiingAdapter = outerAdaper
-            val eventIntent = Intent(outActivity, EventActivity::class.java)
-            val eventJson = JsonHelper.eventToJson(event)
-            eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
-            startActivityForResult(eventIntent, 0)
-        }
-
-        fun onClickedAddEventBtn(day : Day) {
-            println("Add event!")
-            val newEmptyEvent = Event("Empty event")
-            day.addEvent(newEmptyEvent)
-
-            outActivity.adapter.notifyDataSetChanged()
-            Toast.makeText(outActivity, "Event added", Toast.LENGTH_SHORT).show()
-        }
 
         fun onLongClickedEvent(parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long): Boolean {
-            listView = parent
-            eventPosition = position
+            this@MainActivity.listView = parent
+            this@MainActivity.eventPosition = position
 
-            parent.getChildAt(position).isSelected = true
+            if(parent.adapter.getSelectedViewsCount() > 0)
+                parent.adapter.removeAllSelectedViews()
+
+            parent.adapter.addSelectedView(position)
+            parent.adapter.notifyDataSetChanged()
+
 
             moveUpBtn.alpha = 1F
             moveUpBtn.isEnabled = true

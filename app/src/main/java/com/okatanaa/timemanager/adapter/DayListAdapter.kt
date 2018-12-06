@@ -1,20 +1,25 @@
 package com.okatanaa.timemanager.adapter
 
 import android.content.Context
+import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ListView
 import android.widget.TextView
 import com.okatanaa.timemanager.R
+import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 
-class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event, DayListAdapter) -> Unit) : BaseAdapter() {
+class DayListAdapter(val context: Context, val day: Day, val onEventClickListener: OnEventClickListener) : BaseAdapter() {
+    val selectedViews: MutableSet<Int> = mutableSetOf()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val eventView: View
         val holder: ViewHolder
+
 
         if(convertView == null) {
             eventView = LayoutInflater.from(context).inflate(R.layout.day_item, null)
@@ -36,8 +41,13 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event,
         // Make events in the list clickable!
         // We need to update listener each time because otherwise
         // event activity would get another event(not one you clicked on)
-        eventView.setOnClickListener { eventClick(event, this) }
+        eventView.setOnClickListener { onEventClickListener.onEventClicked(event, this, position) }
         eventView.isLongClickable = true
+        if(this.selectedViews.contains(position))
+            eventView.setBackgroundResource(R.drawable.day_item_selected)
+        else
+            eventView.setBackgroundResource(R.drawable.day_item_not_selected)
+        println("Event position ${position} isSelected: ${eventView.isSelected} setContains: ${this.selectedViews.contains(position)}")
 
         return eventView
     }
@@ -54,6 +64,24 @@ class DayListAdapter(val context: Context, val day: Day, val eventClick: (Event,
     override fun getCount(): Int {
         return day.eventCount()
     }
+
+    fun addSelectedView(position: Int) {
+        this.selectedViews.add(position)
+        println(this.selectedViews)
+    }
+
+    fun removeSelectedView(position: Int) {
+        if(!this.selectedViews.contains(position))
+            throw NoSuchElementException("This view is not selected!")
+
+        this.selectedViews.remove(position)
+    }
+
+    fun removeAllSelectedViews() {
+        this.selectedViews.clear()
+    }
+
+    fun getSelectedViewsCount() = this.selectedViews.size
 
 
     private class ViewHolder {

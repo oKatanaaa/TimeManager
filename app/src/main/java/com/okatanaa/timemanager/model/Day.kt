@@ -26,17 +26,22 @@ class Day {
         events.removeAt(index)
     }
 
-    fun moveEvent(firstPos: Int, secondPos: Int) {
-        val movingEvent = events.removeAt(firstPos)
+    fun moveEventUp(currentPos: Int): Boolean {
+        if(currentPos == 0)
+            return false
 
-        if(firstPos == secondPos)
-            return
-        if(secondPos == -1)
-            return
-        if(secondPos == eventCount())
-            events.add(movingEvent)
+        val movingEvent = events.removeAt(currentPos)
+        events.add(currentPos - 1, movingEvent)
+        return true
+    }
 
-        events.add(secondPos, movingEvent)
+    fun moveEventDown(currentPos: Int): Boolean {
+        if(currentPos == events.size - 1)
+            return false
+
+        val movingEvent = events.removeAt(currentPos)
+        events.add(currentPos + 1, movingEvent)
+        return true
     }
 
     fun getEvent(index: Int): Event {
