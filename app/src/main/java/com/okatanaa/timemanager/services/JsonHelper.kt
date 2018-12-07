@@ -50,14 +50,9 @@ class JsonHelper {
             return weekArray
         }
 
-        // Temporary function. Need it for testing
-        fun readFirstWeekFromJson(json: JSONObject): Week {
-            val jsonWeekArray = json.getJSONArray(JSON_WEEKS)
-            return weekFromJson(jsonWeekArray[0] as JSONObject)
-        }
-
         fun weekFromJson(json: JSONObject): Week {
             val weekName = json.getString(JSON_NAME)
+            println(weekName)
             val jsonDayArray = json.getJSONArray(JSON_DAYS)
 
             val dayList = arrayListOf<Day>()

@@ -251,6 +251,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onWeekClicked(week: Week, adapter: WeekListAdapter, position: Int) {
         DataService.currentWeek = week
+        weekListAdapter.notifyDataSetChanged()
         reloadData()
         Toast.makeText(this, "Week clicked!", Toast.LENGTH_SHORT).show()
     }
@@ -272,8 +273,9 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     fun saveData() {
         val json = JSONObject()
         val jsonArray = JSONArray()
-        for(i in 0 until DataService.weekArray.count())
-            jsonArray.put(JsonHelper.weekToJson(DataService.weekArray[0]))
+        for(i in 0 until DataService.weekArray.count()) {
+            jsonArray.put(JsonHelper.weekToJson(DataService.weekArray[i]))
+        }
         json.put(JSON_WEEKS, jsonArray)
         this.openFileOutput(JSON_PRIMARY_DATA_WEEK_FILE, Context.MODE_PRIVATE).use {
             it.write(json.toString().toByteArray())

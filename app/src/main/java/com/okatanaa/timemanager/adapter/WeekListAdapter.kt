@@ -7,28 +7,25 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.okatanaa.timemanager.R
-import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.interfaces.OnWeekClickListener
-import com.okatanaa.timemanager.model.Day
-import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
-import kotlinx.android.synthetic.main.day_item.view.*
+import com.okatanaa.timemanager.services.DataService
 
 class WeekListAdapter(val context: Context, val weeks: ArrayList<Week>, val onWeekClickListener: OnWeekClickListener) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val eventView: View
+            val weekView: View
             val holder: ViewHolder
 
 
             if (convertView == null) {
-                eventView = LayoutInflater.from(context).inflate(R.layout.week_list_item, null)
+                weekView = LayoutInflater.from(context).inflate(R.layout.week_list_item, null)
                 holder = ViewHolder()
-                holder.weekNameTxt = eventView.findViewById(R.id.weekNameTxt)
-                eventView.tag = holder
+                holder.weekNameTxt = weekView.findViewById(R.id.weekNameTxt)
+                weekView.tag = holder
             } else {
                 holder = convertView.tag as ViewHolder
-                eventView = convertView
+                weekView = convertView
             }
 
             val week = this.weeks[position]
@@ -37,13 +34,16 @@ class WeekListAdapter(val context: Context, val weeks: ArrayList<Week>, val onWe
             // Make events in the list clickable!
             // We need to update listener each time because otherwise
             // event activity would get another event(not one you clicked on)
-            eventView.setOnClickListener { onWeekClickListener.onWeekClicked(week, this, position) }
+            weekView.setOnClickListener { onWeekClickListener.onWeekClicked(week, this, position) }
 
-
+            if(week == DataService.currentWeek)
+                weekView.setBackgroundResource(R.drawable.week_current_look)
+            else
+                weekView.setBackgroundResource(R.drawable.week_not_current_look)
             //println("Event position ${position} isSelected: ${eventView.isSelected} setContains: ${this.selectedViews.contains(position)}")
 
 
-            return eventView
+            return weekView
     }
 
     override fun getItem(position: Int): Any {
