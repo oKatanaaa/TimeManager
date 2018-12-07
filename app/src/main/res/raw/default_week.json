@@ -1,7 +1,7 @@
 {
   "weeks": [
     {
-      "name" : "First week",
+      "name" : "Week 1",
       "days": [
         {
           "name": "Monday",
@@ -32,6 +32,59 @@
         {
           "name": "Tuesday",
           "events": []
+        },
+        {
+          "name": "Wednesday",
+          "events": []
+        },
+        {
+          "name": "Thursday",
+          "events": []
+        },
+        {
+          "name": "Friday",
+          "events": []
+        },
+        {
+          "name": "Saturday",
+          "events": []
+        },
+        {
+          "name": "Sunday",
+          "events": []
+        }
+      ]
+    },{
+      "name" : "Week 2",
+      "days": [
+        {
+          "name": "Monday",
+          "events": []
+        },
+        {
+          "name": "Tuesday",
+          "events": [
+            {
+            "name": "Call this event as you want!",
+            "description": "Describe this event!",
+            "in_day": "Monday",
+            "start_time": [9, 0],
+            "end_time": [10, 30]
+          },
+            {
+              "name": "Call this event as you want1!",
+              "description": "Describe this event!",
+              "in_day": "Monday",
+              "start_time": [10, 31],
+              "end_time": [11, 30]
+            },
+            {
+              "name": "Call this event as you want2!\nCall this event as you want2!\nCall this event as you want2!\nCall this event as you want2!\nCall this event as you want2!Call this event as you want2!Call this event as you want2!",
+              "description": "Describe this event!",
+              "in_day": "Monday",
+              "start_time": [12, 0],
+              "end_time": [13, 30]
+            }]
         },
         {
           "name": "Wednesday",

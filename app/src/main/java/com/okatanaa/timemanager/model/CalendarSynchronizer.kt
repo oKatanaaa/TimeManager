@@ -20,6 +20,7 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
     var todaysDate = 0
 
     lateinit var synchronizedDay: Day
+    lateinit var thread: CalendarSynchronizer.DaySyncronizer
 
     init {
         setData()
@@ -48,8 +49,13 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
     }
 
     fun startSynchronizingThread() {
-        DaySyncronizer(this.eventChangedListener).start()
+        this.thread = DaySyncronizer(this.eventChangedListener)
+        this.thread.start()
         println("Thread started")
+    }
+
+    fun stopSynchronizingThread() {
+        this.thread.interrupt()
     }
 
     private fun setCurrentWeekDay() {
@@ -122,36 +128,51 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
         override fun run() {
             val currentDay = this@CalendarSynchronizer.synchronizedDay
             var currentEvent: Event? = null
-            var currentEventExists = false
             while(true) {
+                if(isInterrupted)
+                    break
                 val currentHours = this@CalendarSynchronizer.calendar.get(Calendar.HOUR_OF_DAY)
                 val currentMinutes = this@CalendarSynchronizer.calendar.get(Calendar.MINUTE)
                 val currentTime = Time(currentHours, currentMinutes)
-                    synchronized(currentDay) {
-                    for(i in 0 until currentDay.eventCount()) {
-                        val event = currentDay.getEvent(i)
+                var newCurrentEvent: Event? = null
+                var oldEventCount = currentDay.eventCount()
 
-                        event.isCurrent = currentTime.isBetween(event.startTime, event.endTime)
-                        currentEventExists = event.isCurrent
+                begin@for(i in 0 until currentDay.eventCount()) {
+                    if(currentDay.eventCount() != oldEventCount) {
+                        oldEventCount = currentDay.eventCount()
+                        break@begin
+                    }
 
-                        if(currentEventExists && currentEvent == null) {
-                            this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
-                            currentEvent = event
-                            break
-                        } else if (currentEventExists && !currentEvent?.equals(event)!!) {
-                            this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
-                            currentEvent = event
-                            break
-                        }
+                    val event = currentDay.getEvent(i)
+
+                    event.isCurrent = currentTime.isBetween(event.startTime, event.endTime)
+                    if(event.isCurrent) {
+                        newCurrentEvent = event
+                        break
                     }
                 }
-
-                if(!currentEventExists && currentEvent != null) {
-                    currentEvent = null
+                if(newCurrentEvent != null && currentEvent == null) {
+                    println("New!")
+                    currentEvent = newCurrentEvent
                     this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
-                 sleep(500)
+                if(newCurrentEvent == null && currentEvent != null) {
+                    println("New!")
+                    currentEvent = newCurrentEvent
+                    this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                }
+
+                if(newCurrentEvent != null && currentEvent != null && !newCurrentEvent?.equals(currentEvent)) {
+                    println("New!")
+                    currentEvent = newCurrentEvent
+                    this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                }
+                try {
+                    sleep(500)
+                } catch (e: InterruptedException) {
+                    break
+                }
             }
 
         }

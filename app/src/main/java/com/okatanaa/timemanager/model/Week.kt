@@ -1,10 +1,28 @@
 package com.okatanaa.timemanager.model
 
-class Week(val days: ArrayList<Day>) {
-    var name: String = "Default week"
+class Week {
+    val name: String
+    val days: ArrayList<Day>
 
+    constructor(name: String, days: ArrayList<Day>) {
+        this.name = name
+        this.days = days
+    }
 
-    private val dayMap = mapOf(
+    constructor(name: String) {
+        this.name = name
+        this.days = arrayListOf(
+            Day(title = "Monday"),
+            Day(title = "Tuesday"),
+            Day(title = "Wednesday"),
+            Day(title = "Thursday"),
+            Day(title = "Friday"),
+            Day(title = "Saturday"),
+            Day(title = "Sunday")
+        )
+    }
+
+    private val dayMap: Map<String, Int> = mapOf(
         Pair("Monday", 0),
         Pair("Tuesday", 1),
         Pair("Wednesday", 2),

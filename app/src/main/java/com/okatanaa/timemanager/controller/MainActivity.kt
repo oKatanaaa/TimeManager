@@ -4,35 +4,52 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.ContactsContract
+import android.support.annotation.RequiresApi
+import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.adapter.DayListAdapter
+import com.okatanaa.timemanager.adapter.WeekListAdapter
 import com.okatanaa.timemanager.adapter.WeekRecycleAdapter
 import com.okatanaa.timemanager.adapter.WeekRecycleAdapter.Holder
 import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
+import com.okatanaa.timemanager.interfaces.OnWeekClickListener
 import com.okatanaa.timemanager.model.CalendarSynchronizer
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.model.Week
+import com.okatanaa.timemanager.services.DataService
 import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_test.*
+import kotlinx.android.synthetic.main.app_bar_test.*
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.IllegalStateException
 
-class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChangedListener{
+class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChangedListener, OnWeekClickListener{
     // Permanent data
     lateinit var weekAdapter: WeekRecycleAdapter
     lateinit var week: Week
     lateinit var calendarSynchronizer: CalendarSynchronizer
+    lateinit var weekListAdapter: WeekListAdapter
 
     // Data for modifying events
     lateinit var modifyingEvent: Event
@@ -46,15 +63,61 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_test)
+        setSupportActionBar(toolbar)
 
-        this.week = JsonHelper.readFirstWeekFromJson(JsonHelper.readJSON(this))
+
+        val toggle = ActionBarDrawerToggle(
+            this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+
+        DataService.weekArray = JsonHelper.readWeekArr(JsonHelper.readJSON(this))
+        DataService.currentWeek = DataService.weekArray[0]
+        this.weekListAdapter = WeekListAdapter(this, DataService.weekArray, this)
+        week_list_view.adapter = this.weekListAdapter
+
+        this.week = DataService.currentWeek
         this.calendarSynchronizer = CalendarSynchronizer(this.week, this)
 
         setWeekRecycleAdapter()
         setMoveButtons()
         weekRecycleView.scrollToPosition(this.calendarSynchronizer.currentWeekDayNum)
     }
+
+    @SuppressLint("NewApi")
+    fun reloadData() {
+        this.week = DataService.currentWeek
+        this.calendarSynchronizer.stopSynchronizingThread()
+        this.calendarSynchronizer = CalendarSynchronizer(this.week, this)
+        setWeekRecycleAdapter()
+    }
+    override fun onBackPressed() {
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.test, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        when (item.itemId) {
+            R.id.action_settings -> return true
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
 
     fun setWeekRecycleAdapter() {
         this.weekAdapter = WeekRecycleAdapter(this, this.week, this
@@ -185,14 +248,32 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         startActivityForResult(eventIntent, 0)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onWeekClicked(week: Week, adapter: WeekListAdapter, position: Int) {
+        DataService.currentWeek = week
+        reloadData()
+        Toast.makeText(this, "Week clicked!", Toast.LENGTH_SHORT).show()
+    }
+
+    fun addWeekBtnClicked(view: View) {
+        DataService.weekArray.add(Week("Week ${this.weekListAdapter.count + 1}"))
+        this.weekListAdapter.notifyDataSetChanged()
+    }
+
     override fun currentEventChanged(dayPosition: Int) {
-        this.weekAdapter.notifyItemChanged(dayPosition)
+        try {
+            this.weekAdapter.notifyItemChanged(dayPosition)
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+        }
+
     }
 
     fun saveData() {
         val json = JSONObject()
         val jsonArray = JSONArray()
-        jsonArray.put(JsonHelper.weekToJson(this.week))
+        for(i in 0 until DataService.weekArray.count())
+            jsonArray.put(JsonHelper.weekToJson(DataService.weekArray[0]))
         json.put(JSON_WEEKS, jsonArray)
         this.openFileOutput(JSON_PRIMARY_DATA_WEEK_FILE, Context.MODE_PRIVATE).use {
             it.write(json.toString().toByteArray())

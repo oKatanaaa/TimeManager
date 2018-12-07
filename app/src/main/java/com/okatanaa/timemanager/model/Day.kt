@@ -5,11 +5,11 @@ import android.widget.BaseAdapter
 import android.widget.SpinnerAdapter
 
 class Day {
-    private var events: ArrayList<Event>
-    var title: String
-    lateinit var month: String
-    var todaysDate = 0
-    var isToday = false
+    @Volatile private var events: ArrayList<Event>
+    @Volatile var title: String
+    @Volatile lateinit var month: String
+    @Volatile var todaysDate = 0
+    @Volatile var isToday = false
 
     constructor(events: ArrayList<Event> =
                 arrayListOf(), title: String) {

@@ -7,6 +7,7 @@ import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.utilities.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.io.InputStream
 
 class JsonHelper {
@@ -17,11 +18,11 @@ class JsonHelper {
 
             // Check if json file with user's data exists
             var input: InputStream? = null
-            /*try {
+            try {
                 input = context.openFileInput(JSON_PRIMARY_DATA_WEEK_FILE)
             } catch (e: IOException) {
                 e.printStackTrace()
-            }*/
+            }
 
             // Json file does not exist. Read data from resources
             if(input == null)
@@ -38,6 +39,17 @@ class JsonHelper {
             return json
         }
 
+
+        fun readWeekArr(json: JSONObject): ArrayList<Week> {
+            val jsonWeekArray = json.getJSONArray(JSON_WEEKS)
+
+            val weekArray = arrayListOf<Week>()
+            for(i in 0 until jsonWeekArray.length())
+                weekArray.add(weekFromJson(jsonWeekArray[i] as JSONObject))
+
+            return weekArray
+        }
+
         // Temporary function. Need it for testing
         fun readFirstWeekFromJson(json: JSONObject): Week {
             val jsonWeekArray = json.getJSONArray(JSON_WEEKS)
@@ -45,13 +57,14 @@ class JsonHelper {
         }
 
         fun weekFromJson(json: JSONObject): Week {
+            val weekName = json.getString(JSON_NAME)
             val jsonDayArray = json.getJSONArray(JSON_DAYS)
 
             val dayList = arrayListOf<Day>()
             for (i in 0 until jsonDayArray.length()) {
                 dayList.add(dayFromJson(jsonDayArray[i] as JSONObject))
             }
-            return Week(dayList)
+            return Week(weekName, dayList)
         }
 
         fun dayFromJson(json: JSONObject): Day {
@@ -85,7 +98,7 @@ class JsonHelper {
             for(i in 0 until week.count()){
                 jsonArray.put(dayToJson(week.getDay(i)))
             }
-
+            json.put(JSON_NAME, week.name)
             json.put(JSON_DAYS, jsonArray)
             return json
         }

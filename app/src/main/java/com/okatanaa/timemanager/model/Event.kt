@@ -7,10 +7,10 @@ class Event {
     var startTimeArr: ArrayList<Int>
     var endTimeArr: ArrayList<Int>
     lateinit var inDay: Day
-    var isCurrent = false
+    @Volatile var isCurrent = false
 
-    lateinit var startTime: Time
-    lateinit var endTime: Time
+    @Volatile lateinit var startTime: Time
+    @Volatile lateinit var endTime: Time
 
     constructor(name: String = "Empty event",
                 description: String = "",
@@ -28,7 +28,7 @@ class Event {
     }
 
 
-    fun copy(other: Event): Event {
+    @Synchronized fun copy(other: Event): Event {
         this.name = other.name
         this.description = other.description
         this.startTimeArr = other.startTimeArr.clone() as ArrayList<Int>
@@ -40,23 +40,23 @@ class Event {
     }
 
     // This function is called only after adding event in a particular day
-    fun setDay(day: Day) {
+    @Synchronized fun setDay(day: Day) {
         this.inDay = day
     }
 
-    fun smartSetStartTime(startTime: Time) {
+    @Synchronized fun smartSetStartTime(startTime: Time) {
         this.startTime = startTime
         this.startTimeArr[0] = startTime.hours
         this.startTimeArr[1] = startTime.minutes
     }
 
-    fun smartSetEndTime(endTime: Time) {
+    @Synchronized fun smartSetEndTime(endTime: Time) {
         this.endTime = endTime
         this.endTimeArr[0] = endTime.hours
         this.endTimeArr[1] = endTime.minutes
     }
 
-    fun swapWithoutTimeCopy(other: Event) {
+    @Synchronized fun swapWithoutTimeCopy(other: Event) {
         val temp = Event().copy(other)
         other.copy(this)
         other.smartSetStartTime(temp.startTime)
@@ -68,11 +68,11 @@ class Event {
         this.smartSetEndTime(oldEndTime)
     }
 
-    override fun toString(): String {
+    @Synchronized override fun toString(): String {
         return name
     }
 
-    override fun equals(other: Any?): Boolean {
+    @Synchronized override fun equals(other: Any?): Boolean {
         if(other !is Event)
             return false
 
