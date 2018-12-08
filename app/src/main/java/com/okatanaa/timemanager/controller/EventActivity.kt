@@ -17,14 +17,20 @@ import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.content_event.*
 import org.json.JSONObject
+import kotlin.IllegalArgumentException
 import kotlin.math.round
 
 
 class EventActivity : AppCompatActivity() {
 
     lateinit var event : Event
-    val EVENT_NAME = "Event Name"
-    val DESCRIPTION = "Description"
+    companion object {
+        const val EVENT_NAME = "Event Name"
+        const val DESCRIPTION = "Description"
+        const val START_TIME = "Start time"
+        const val END_TIME = "End time"
+    }
+
 
     var topTimeBorder = 0
     var bottomTimeBorder = Time.MINUTES_IN_DAY
@@ -54,14 +60,17 @@ class EventActivity : AppCompatActivity() {
 
     fun setTextViews() {
         eventNameTxt.text = event.name
-        eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, this.EVENT_NAME, eventNameTxt.text.toString())}
+        eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, EVENT_NAME, eventNameTxt.text.toString())}
 
         eventDescriptionTxt.text = event.description
-        eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, this.DESCRIPTION, eventDescriptionTxt.text.toString())}
+        eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, DESCRIPTION, eventDescriptionTxt.text.toString())}
         inWhatDayTxt.text = event?.inDay.toString()
 
         startTimeDynamicTxt.text = this.event.startTime.toString()
+        startTimeDynamicTxt.setOnClickListener { TextClickedListener.onClick(this, START_TIME, startTimeDynamicTxt.text.toString()) }
+
         endTimeDynamicTxt.text = this.event.endTime.toString()
+        endTimeDynamicTxt.setOnClickListener { TextClickedListener.onClick(this, END_TIME, endTimeDynamicTxt.text.toString()) }
     }
 
     fun setTimeBars() {
@@ -128,8 +137,41 @@ class EventActivity : AppCompatActivity() {
                     eventNameTxt.text = data?.getStringExtra(EXTRA_EDITED_VALUE)
                 DESCRIPTION ->
                     eventDescriptionTxt.text = data?.getStringExtra(EXTRA_EDITED_VALUE)
+                START_TIME ->
+                    try {
+                        val newTimeString = data?.getStringExtra(EXTRA_EDITED_VALUE)
+                        val newTime = Time(newTimeString)
+
+                        if(newTime.isBetween(Time(this.topTimeBorder), Time(this.currentEndTime))) {
+                            this.currentStartTime = newTime.toMinutes()
+                            startTimeDynamicTxt.text = newTimeString
+                        }
+                        else
+                            Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
+
+                    } catch (e: IllegalArgumentException) {
+                        println(e.message)
+                        Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
+                    }
+                END_TIME ->
+                    try {
+                        val newTimeString = data?.getStringExtra(EXTRA_EDITED_VALUE)
+                        val newTime = Time(newTimeString)
+
+                        if(newTime.isBetween(Time(this.currentStartTime), Time(this.bottomTimeBorder))) {
+                            this.currentEndTime = newTime.toMinutes()
+                            endTimeDynamicTxt.text = newTimeString
+                        }
+                        else
+                            Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
+
+                    } catch (e: IllegalArgumentException) {
+                        println(e.message)
+                        Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
+                    }
+
                 else ->
-                    Unit
+                    throw IllegalArgumentException("Unknown edited name!")
             }
     }
 
@@ -138,6 +180,7 @@ class EventActivity : AppCompatActivity() {
         setResult(Activity.RESULT_CANCELED, Intent())
         finish()
     }
+
 
     inner class StartTimeBarListener: SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {

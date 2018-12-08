@@ -1,7 +1,7 @@
 package com.okatanaa.timemanager.model
 
 class Week {
-    val name: String
+    var name: String
     val days: ArrayList<Day>
 
     constructor(name: String, days: ArrayList<Day>) {

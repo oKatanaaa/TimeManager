@@ -2,15 +2,14 @@ package com.okatanaa.timemanager.model
 
 import android.icu.util.Calendar
 import android.os.Build
+import android.os.Handler
 import android.support.annotation.RequiresApi
+import com.okatanaa.timemanager.additional_classes.LocalDate
 import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
-import java.time.LocalDate
 import kotlin.IllegalArgumentException
 
-@RequiresApi(Build.VERSION_CODES.O)
-class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEventChangedListener) {
+class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEventChangedListener, val handler: Handler) {
 
-    @RequiresApi(Build.VERSION_CODES.N)
     val calendar = Calendar.getInstance()
     lateinit var currentWeekDay: String
     var currentWeekDayNum = 0
@@ -28,9 +27,8 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
         startSynchronizingThread()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun synchronize() {
-        var helper = LocalDate.of(2018, this.currentMonthNum, this.todaysDate).minusDays(this.currentWeekDayNum.toLong())
+        var helper = LocalDate.of(2018, this.currentMonthNum, this.todaysDate).minusDays(this.currentWeekDayNum)
         for(day in this.week.days) {
             day.todaysDate = helper.dayOfMonth
             day.month = getMonthNameByNumber(helper.monthValue)
@@ -49,7 +47,8 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
     }
 
     fun startSynchronizingThread() {
-        this.thread = DaySyncronizer(this.eventChangedListener)
+        this.thread = DaySyncronizer(this.eventChangedListener, this.handler)
+        this.thread.isDaemon = true
         this.thread.start()
         println("Thread started")
     }
@@ -124,7 +123,7 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
         else -> throw IllegalArgumentException("Unknown month!")
     }
 
-    inner class DaySyncronizer(val eventChangedListener: CurrentEventChangedListener): Thread() {
+    inner class DaySyncronizer(val eventChangedListener: CurrentEventChangedListener, val handler: Handler): Thread() {
         override fun run() {
             val currentDay = this@CalendarSynchronizer.synchronizedDay
             var currentEvent: Event? = null
@@ -154,19 +153,22 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
                 if(newCurrentEvent != null && currentEvent == null) {
                     println("New!")
                     currentEvent = newCurrentEvent
-                    this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                    this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
+                    //this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
                 if(newCurrentEvent == null && currentEvent != null) {
                     println("New!")
                     currentEvent = newCurrentEvent
-                    this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                    this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
+                    //this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
                 if(newCurrentEvent != null && currentEvent != null && !newCurrentEvent?.equals(currentEvent)) {
                     println("New!")
                     currentEvent = newCurrentEvent
-                    this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
+                    this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
+                    //this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
                 try {
                     sleep(500)

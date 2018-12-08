@@ -26,6 +26,21 @@ class Time {
         this.minutes = time[1]
     }
 
+    @Throws(IllegalStateException::class)
+    constructor(time: String) {
+        if(time.length != 5)
+            throw IllegalArgumentException("Bad string format!")
+
+        if(!time[0].isDigit() || !time[1].isDigit() ||
+        time[2] != ':' || !time[0].isDigit() || !time[1].isDigit())
+            throw IllegalArgumentException("Incorrect string data! Passed: $time")
+
+        this.hours = time.substring(0..1).toInt()
+        println(this.hours)
+        this.minutes = time.substring(3).toInt()
+        println(this.minutes)
+    }
+
 
     fun toMinutes(): Int = this.hours * Time.MINUTES_IN_HOUR + this.minutes
 
@@ -50,6 +65,6 @@ class Time {
         val leftMinutes = left.toMinutes()
         val rightMinutes = right.toMinutes()
         val current = this.toMinutes()
-        return leftMinutes < current && current < rightMinutes
+        return leftMinutes <= current && current <= rightMinutes
     }
 }

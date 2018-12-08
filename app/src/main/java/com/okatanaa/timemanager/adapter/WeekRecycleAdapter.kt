@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
+import com.okatanaa.timemanager.interfaces.OnEventLongClickListener
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Week
@@ -33,7 +34,7 @@ import kotlinx.android.synthetic.main.week_item.view.*
  */
 class WeekRecycleAdapter(val context: Context, val week: Week,
                          val onEventClickListener: OnEventClickListener,
-                         val eventLongClick: (parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long) -> Boolean)
+                         val onEventLongClickListener: OnEventLongClickListener)
     : RecyclerView.Adapter<WeekRecycleAdapter.Holder>() {
 
 
@@ -64,10 +65,13 @@ class WeekRecycleAdapter(val context: Context, val week: Week,
 
             if(day.isToday)
                 this.itemView.dayLayout.setBackgroundResource(R.drawable.week_item_today_look)
+            else
+                this.itemView.dayLayout.setBackgroundResource(R.drawable.week_item_look)
 
             val adapter = DayListAdapter(context, day, onEventClickListener)
             dayListView?.adapter = adapter
-            dayListView.setOnItemLongClickListener { parent, view, position, id ->  eventLongClick(parent as @kotlin.ParameterName(name = "parent") AdapterView<DayListAdapter>, view, position, id)}
+            dayListView.setOnItemLongClickListener { parent, view, position, id ->
+                onEventLongClickListener.onEventLongClicked(parent as @kotlin.ParameterName(name = "parent") AdapterView<DayListAdapter>, view, position, id)}
 
             eventAddBtn.setOnClickListener{
                 val newEvent = Event("Event ${day.eventCount()}")

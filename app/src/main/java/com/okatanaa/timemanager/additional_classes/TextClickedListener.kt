@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.okatanaa.timemanager.controller.TextEditorActivity
 import com.okatanaa.timemanager.utilities.EXTRA_EDITED_NAME
 import com.okatanaa.timemanager.utilities.EXTRA_EDITED_VALUE
+import com.okatanaa.timemanager.utilities.RC_TEXT_EDITOR_ACTIVITY
 import java.lang.Exception
 
 
@@ -29,7 +30,7 @@ class TextClickedListener{
             textEditorIntent.putExtra(EXTRA_EDITED_NAME, editedName)
             textEditorIntent.putExtra(EXTRA_EDITED_VALUE, textToEdit)
             Toast.makeText(context, "I'm here!", Toast.LENGTH_SHORT).show()
-            (context as Activity).startActivityForResult(textEditorIntent, 0)
+            (context as Activity).startActivityForResult(textEditorIntent, RC_TEXT_EDITOR_ACTIVITY)
         }
     }
 }

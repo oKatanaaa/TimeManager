@@ -14,4 +14,6 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+    <string name="action_delete_week">Delete week</string>
+    <string name="action_rename_week">Rename week</string>
 </resources>

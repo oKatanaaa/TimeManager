@@ -67,7 +67,7 @@
             app:layout_constraintStart_toEndOf="@+id/startTimeBar"
             android:layout_marginStart="8dp"
             android:text="12:00"
-            android:textAlignment="center"/>
+            android:textAlignment="center" android:clickable="true" android:onClick="onStartTimeClicked"/>
     <TextView
             android:layout_width="59dp"
             android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
             android:layout_marginTop="12dp"
             app:layout_constraintTop_toBottomOf="@+id/endTimeLbl"
             android:text="12:30"
-            android:textAlignment="center"/>
+            android:textAlignment="center" android:clickable="true" android:onClick="onEndTimeClicked"/>
     <TextView
             android:text="End time:"
             android:layout_width="wrap_content"
