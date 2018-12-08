@@ -1,5 +1,9 @@
 package com.okatanaa.timemanager.additional_classes
-
+/*
+* This class is created in order to replace android.LocalDate class
+* and decrease the android version os requirement.(android.LocalDate requires API 26)
+*
+ */
 class LocalDate {
     private val year: Int
 

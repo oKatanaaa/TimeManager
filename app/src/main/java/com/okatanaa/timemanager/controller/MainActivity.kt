@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
                 if (this.currentWeekPosition == DataService.weekArray.size - 1)
                     this.currentWeekPosition = this.currentWeekPosition - 1
 
-                DataService.weekArray.removeAt(this.currentWeekPosition)
+                DataService.weekArray.removeAt(this.currentWeekPosition + 1)
                 DataService.currentWeek = DataService.weekArray[currentWeekPosition]
                 weekListAdapter.notifyDataSetChanged()
                 reloadData()
