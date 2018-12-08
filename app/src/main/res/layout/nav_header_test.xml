@@ -11,8 +11,8 @@
         android:id="@+id/linearLayout">
 
     <ImageButton
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:srcCompat="@android:drawable/ic_menu_add"
             android:id="@+id/addWeekBtn"
             app:layout_constraintEnd_toEndOf="parent"
@@ -20,6 +20,39 @@
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             android:background="@android:color/transparent" android:onClick="addWeekBtnClicked"
-    />
+            android:contentDescription="@string/add_week_btn_desc"/>
+    <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:srcCompat="@android:drawable/arrow_up_float"
+            android:id="@+id/moveWeekUpBtn"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="24dp"
+            android:background="@drawable/move_btn_look" android:scaleType="fitCenter" android:padding="10dp"
+            android:contentDescription="@string/move_week_up_btn_desc" android:onClick="onMoveWeekUpBtnClicked"/>
+    <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:id="@+id/moveWeekDownBtn"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/moveWeekUpBtn"
+            android:layout_marginStart="24dp"
+            android:background="@drawable/move_btn_look" android:scaleType="fitCenter" android:padding="10dp"
+            android:contentDescription="@string/move_week_down_btn_desc" android:onClick="onMoveWeekDownBtnClicked"/>
+    <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:srcCompat="@android:drawable/ic_delete"
+            android:id="@+id/deleteWeekBtn"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/moveWeekDownBtn"
+            android:background="@drawable/move_btn_look"
+            android:layout_marginStart="24dp" android:scaleType="fitCenter" android:padding="6dp"
+            android:onClick="onDeleteWeekBtnClicked"/>
 
 </android.support.constraint.ConstraintLayout>

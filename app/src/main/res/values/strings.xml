@@ -17,4 +17,7 @@
     <string name="action_delete_week">Delete week</string>
     <string name="action_rename_week">Rename week</string>
     <string name="action_copy_week">Copy week</string>
+    <string name="add_week_btn_desc">Adding new week</string>
+    <string name="move_week_up_btn_desc">Moving current week up</string>
+    <string name="move_week_down_btn_desc">Moving current week down</string>
 </resources>

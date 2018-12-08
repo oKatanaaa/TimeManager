@@ -119,27 +119,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         when (item.itemId) {
             R.id.action_settings -> return true
             R.id.action_delete_week -> {
-                if (DataService.weekArray.size == 1) {
-                    Toast.makeText(this, "Must be at least one week!", Toast.LENGTH_SHORT).show()
-                    return false
-                }
-
-                if (this.currentWeekPosition == DataService.weekArray.size - 1) {
-                    this.currentWeekPosition = this.currentWeekPosition - 1
-                    DataService.weekArray.removeAt(this.currentWeekPosition + 1)
-                    DataService.currentWeek = DataService.weekArray[currentWeekPosition]
-                    weekListAdapter.notifyDataSetChanged()
-                    reloadData()
-                    Toast.makeText(this, "Week deleted!", Toast.LENGTH_SHORT).show()
-                    return true
-                }
-
-                DataService.weekArray.removeAt(this.currentWeekPosition)
-                DataService.currentWeek = DataService.weekArray[currentWeekPosition]
-                weekListAdapter.notifyDataSetChanged()
-                reloadData()
-                Toast.makeText(this, "Week deleted!", Toast.LENGTH_SHORT).show()
-                return true
+                return deleteCurrentWeek()
             }
             R.id.action_rename_week -> {
                 TextClickedListener.onClick(this, WEEK_NAME, week.name)
@@ -242,8 +222,8 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
 
     /// LISTEN FUNCTIONS
 
+    /// EVENT INTERACTION
 
-    // This listen function is for drawer layout where the weeks are
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -330,32 +310,6 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         startActivityForResult(eventIntent, RC_EVENT_ACTIVITY)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onWeekClicked(week: Week, adapter: WeekListAdapter, position: Int) {
-        DataService.currentWeek = week
-        this.currentWeekPosition = position
-        this.weekListAdapter.notifyDataSetChanged()
-        reloadData()
-        Toast.makeText(this, "Week clicked!", Toast.LENGTH_SHORT).show()
-    }
-
-    fun addWeekBtnClicked(view: View) {
-        DataService.weekArray.add(Week("Week ${this.weekListAdapter.count + 1}"))
-        this.weekListAdapter.notifyDataSetChanged()
-    }
-
-    override fun currentEventChanged(dayPosition: Int) {
-        try {
-            // Safe call is here because it can be not initialized yet
-            if(this.weekAdapter != null)
-                this.weekAdapter?.notifyItemChanged(dayPosition)
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
-        }
-
-    }
-
-
     override fun onEventLongClicked(parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long): Boolean {
         this@MainActivity.listView = parent
         this@MainActivity.eventPosition = position
@@ -389,6 +343,77 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
 
         return true
     }
+
+    /// WEEK INTERACTION
+
+    fun onMoveWeekUpBtnClicked(view: View) {
+        if(DataService.moveWeekUp(this.currentWeekPosition))
+            this.currentWeekPosition--
+
+        this.weekListAdapter.notifyDataSetChanged()
+    }
+
+    fun onMoveWeekDownBtnClicked(view: View) {
+        if(DataService.moveWeekDown(this.currentWeekPosition))
+            this.currentWeekPosition++
+
+        this.weekListAdapter.notifyDataSetChanged()
+    }
+
+    fun onDeleteWeekBtnClicked(view: View) {
+        deleteCurrentWeek()
+    }
+
+    fun deleteCurrentWeek(): Boolean {
+        if (DataService.weekArray.size == 1) {
+            Toast.makeText(this, "Must be at least one week!", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        if (this.currentWeekPosition == DataService.weekArray.size - 1) {
+            this.currentWeekPosition = this.currentWeekPosition - 1
+            DataService.weekArray.removeAt(this.currentWeekPosition + 1)
+            DataService.currentWeek = DataService.weekArray[currentWeekPosition]
+            weekListAdapter.notifyDataSetChanged()
+            reloadData()
+            Toast.makeText(this, "Week deleted!", Toast.LENGTH_SHORT).show()
+            return true
+        }
+
+        DataService.weekArray.removeAt(this.currentWeekPosition)
+        DataService.currentWeek = DataService.weekArray[currentWeekPosition]
+        weekListAdapter.notifyDataSetChanged()
+        reloadData()
+        Toast.makeText(this, "Week deleted!", Toast.LENGTH_SHORT).show()
+        return true
+    }
+
+    override fun onWeekClicked(week: Week, adapter: WeekListAdapter, position: Int) {
+        DataService.currentWeek = week
+        this.currentWeekPosition = position
+        this.weekListAdapter.notifyDataSetChanged()
+        reloadData()
+        Toast.makeText(this, "Week clicked!", Toast.LENGTH_SHORT).show()
+    }
+
+    fun addWeekBtnClicked(view: View) {
+        DataService.weekArray.add(Week("Week ${this.weekListAdapter.count + 1}"))
+        this.weekListAdapter.notifyDataSetChanged()
+    }
+
+    override fun currentEventChanged(dayPosition: Int) {
+        try {
+            // Safe call is here because it can be not initialized yet
+            if(this.weekAdapter != null)
+                this.weekAdapter?.notifyItemChanged(dayPosition)
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+        }
+
+    }
+
+
+
 
 
     companion object {
