@@ -1,16 +1,18 @@
 package com.okatanaa.timemanager.model
 
-import android.icu.util.Calendar
+import java.util.Calendar
 import android.os.Build
 import android.os.Handler
 import android.support.annotation.RequiresApi
 import com.okatanaa.timemanager.additional_classes.LocalDate
 import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
+import java.util.*
 import kotlin.IllegalArgumentException
 
-class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEventChangedListener, val handler: Handler) {
+class CalendarSynchronizer(val week: Week, val handler: Handler) {
 
     val calendar = Calendar.getInstance()
+    val date = Date()
     lateinit var currentWeekDay: String
     var currentWeekDayNum = 0
 
@@ -47,7 +49,7 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
     }
 
     fun startSynchronizingThread() {
-        this.thread = DaySyncronizer(this.eventChangedListener, this.handler)
+        this.thread = DaySyncronizer(this.handler)
         this.thread.isDaemon = true
         this.thread.start()
         println("Thread started")
@@ -123,7 +125,7 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
         else -> throw IllegalArgumentException("Unknown month!")
     }
 
-    inner class DaySyncronizer(val eventChangedListener: CurrentEventChangedListener, val handler: Handler): Thread() {
+    inner class DaySyncronizer(val handler: Handler): Thread() {
         override fun run() {
             val currentDay = this@CalendarSynchronizer.synchronizedDay
             var currentEvent: Event? = null
@@ -154,21 +156,18 @@ class CalendarSynchronizer(val week: Week, val eventChangedListener: CurrentEven
                     println("New!")
                     currentEvent = newCurrentEvent
                     this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
-                    //this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
                 if(newCurrentEvent == null && currentEvent != null) {
                     println("New!")
                     currentEvent = newCurrentEvent
                     this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
-                    //this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
                 if(newCurrentEvent != null && currentEvent != null && !newCurrentEvent?.equals(currentEvent)) {
                     println("New!")
                     currentEvent = newCurrentEvent
                     this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
-                    //this.eventChangedListener.currentEventChanged(this@CalendarSynchronizer.currentWeekDayNum)
                 }
                 try {
                     sleep(500)

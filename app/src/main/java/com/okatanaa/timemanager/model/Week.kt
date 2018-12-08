@@ -22,6 +22,15 @@ class Week {
         )
     }
 
+    constructor(other: Week) {
+        this.name = other.name
+        this.days = arrayListOf<Day>()
+
+        for(day in  other.days) {
+            this.days.add(day.clone())
+        }
+    }
+
     private val dayMap: Map<String, Int> = mapOf(
         Pair("Monday", 0),
         Pair("Tuesday", 1),

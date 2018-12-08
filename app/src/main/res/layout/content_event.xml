@@ -30,9 +30,9 @@
             app:layout_constraintTop_toBottomOf="@+id/textView"
             android:clickable="true"
             android:layout_marginStart="19dp"
-            android:layout_marginEnd="19dp"
+            android:layout_marginEnd="22dp"
             android:textColor="#646464"
-            android:hint="Tap to add description!"
+            android:hint="   Tap to add description!"
             android:textColorHint="#bababa"/>
 
     <TextView
@@ -60,28 +60,28 @@
             android:inputType="time"
             android:ems="10"
             android:id="@+id/startTimeDynamicTxt"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@+id/startTimeLbl"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:background="@drawable/event_activity_description_background"
             app:layout_constraintStart_toEndOf="@+id/startTimeBar"
             android:layout_marginStart="8dp"
             android:text="12:00"
-            android:textAlignment="center" android:clickable="true" android:onClick="onStartTimeClicked"/>
+            android:textAlignment="center" android:clickable="true"
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/startTimeBar"/>
     <TextView
             android:layout_width="59dp"
             android:layout_height="wrap_content"
             android:inputType="time"
             android:ems="10"
             android:id="@+id/endTimeDynamicTxt"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:background="@drawable/event_activity_description_background"
             app:layout_constraintStart_toEndOf="@+id/endTimeBar"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@+id/endTimeLbl"
             android:text="12:30"
-            android:textAlignment="center" android:clickable="true" android:onClick="onEndTimeClicked"/>
+            android:textAlignment="center" android:clickable="true"
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/endTimeBar"/>
     <TextView
             android:text="End time:"
             android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
             android:layout_height="26dp"
             android:id="@+id/endTimeBar"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="19dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@+id/endTimeLbl"
             android:layout_marginBottom="8dp"
@@ -106,8 +106,9 @@
             android:layout_height="26dp"
             android:id="@+id/startTimeBar"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="19dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/startTimeLbl"/>
+            app:layout_constraintTop_toBottomOf="@+id/startTimeLbl"
+    />
 </android.support.constraint.ConstraintLayout>
 </ScrollView>

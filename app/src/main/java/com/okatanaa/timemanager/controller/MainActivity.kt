@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.RequiresApi
+import android.support.constraint.ConstraintSet
+import android.support.constraint.Constraints
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
@@ -36,9 +38,9 @@ import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.DataService
 import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_test.*
 import kotlinx.android.synthetic.main.app_bar_test.*
+import kotlinx.android.synthetic.main.content_test.*
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.IllegalStateException
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     // Data for move buttons
     lateinit var listView: AdapterView<DayListAdapter>
     var eventPosition: Int = 0
+
     lateinit var handler: Handler
 
 
@@ -68,26 +71,26 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         setContentView(R.layout.activity_test)
         setSupportActionBar(toolbar)
 
-
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
-
+        // Load necessary data
         DataService.weekArray = JsonHelper.readWeekArr(JsonHelper.readJSON(this))
         DataService.currentWeek = DataService.weekArray[0]
         this.weekListAdapter = WeekListAdapter(this, DataService.weekArray, this)
         week_list_view.adapter = this.weekListAdapter
 
+        // Set the data will be worked on
         this.week = DataService.currentWeek
         this.handler = Handler() {
             val  dayPosition = it.what.toInt()
             this.weekAdapter?.notifyItemChanged(dayPosition)
             true
         }
-        this.calendarSynchronizer = CalendarSynchronizer(this.week, this, this.handler)
+        this.calendarSynchronizer = CalendarSynchronizer(this.week, this.handler)
 
         setWeekRecycleAdapter()
         setMoveButtons()
@@ -97,8 +100,9 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     fun reloadData() {
         this.week = DataService.currentWeek
         this.calendarSynchronizer.stopSynchronizingThread()
-        this.calendarSynchronizer = CalendarSynchronizer(this.week, this, this.handler)
+        this.calendarSynchronizer = CalendarSynchronizer(this.week, this.handler)
         setWeekRecycleAdapter()
+        weekRecycleView.scrollToPosition(this.calendarSynchronizer.currentWeekDayNum)
     }
 
 
@@ -119,10 +123,18 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
                     Toast.makeText(this, "Must be at least one week!", Toast.LENGTH_SHORT).show()
                     return false
                 }
-                if (this.currentWeekPosition == DataService.weekArray.size - 1)
-                    this.currentWeekPosition = this.currentWeekPosition - 1
 
-                DataService.weekArray.removeAt(this.currentWeekPosition + 1)
+                if (this.currentWeekPosition == DataService.weekArray.size - 1) {
+                    this.currentWeekPosition = this.currentWeekPosition - 1
+                    DataService.weekArray.removeAt(this.currentWeekPosition + 1)
+                    DataService.currentWeek = DataService.weekArray[currentWeekPosition]
+                    weekListAdapter.notifyDataSetChanged()
+                    reloadData()
+                    Toast.makeText(this, "Week deleted!", Toast.LENGTH_SHORT).show()
+                    return true
+                }
+
+                DataService.weekArray.removeAt(this.currentWeekPosition)
                 DataService.currentWeek = DataService.weekArray[currentWeekPosition]
                 weekListAdapter.notifyDataSetChanged()
                 reloadData()
@@ -131,6 +143,13 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
             }
             R.id.action_rename_week -> {
                 TextClickedListener.onClick(this, WEEK_NAME, week.name)
+                return true
+            }
+            R.id.action_copy_week -> {
+                val weekCopy = Week(this.week)
+                weekCopy.name = weekCopy.name + "(copy)"
+                DataService.weekArray.add(this.currentWeekPosition + 1, weekCopy)
+                this.weekListAdapter.notifyDataSetChanged()
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -151,6 +170,9 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     }
 
     fun setMoveButtons() {
+        moveLayout.alpha = 0F
+        moveLayout.isEnabled = false
+
         moveUpBtn.alpha = 0F
         moveUpBtn.isEnabled = false
         moveDoneBtn.alpha = 0F
@@ -246,7 +268,13 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         this.listView.adapter.removeAllSelectedViews()
         this.listView.adapter.notifyDataSetChanged()
         setMoveButtons()
+
+        val newConstraintSet = ConstraintSet()
+        newConstraintSet.clone(contentTestLayout)
+        newConstraintSet.connect(R.id.weekRecycleView, ConstraintSet.BOTTOM, R.id.contentTestLayout, ConstraintSet.BOTTOM)
+        newConstraintSet.applyTo(contentTestLayout)
     }
+
 
     fun onClickedMoveDownBtn(view: View) {
         this.listView.adapter.removeSelectedView(this.eventPosition)
@@ -338,7 +366,13 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         parent.adapter.addSelectedView(position)
         parent.adapter.notifyDataSetChanged()
 
+        val newConstraintSet = ConstraintSet()
+        newConstraintSet.clone(contentTestLayout)
+        newConstraintSet.connect(R.id.weekRecycleView, ConstraintSet.BOTTOM, R.id.moveLayout, ConstraintSet.TOP)
+        newConstraintSet.applyTo(contentTestLayout)
 
+        moveLayout.alpha = 1F
+        moveLayout.isEnabled = true
         moveUpBtn.alpha = 1F
         moveUpBtn.isEnabled = true
         moveDoneBtn.alpha = 1F
@@ -351,6 +385,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         moveUpBtn.startAnimation(animation)
         moveDoneBtn.startAnimation(animation)
         moveDownBtn.startAnimation(animation)
+        moveLayout.startAnimation(animation)
 
         return true
     }

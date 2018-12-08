@@ -98,4 +98,15 @@ class Day {
     @Synchronized override fun toString(): String {
         return this.title
     }
+
+    @Synchronized fun clone(): Day {
+        val newEvents = arrayListOf<Event>()
+
+        for(event in this.events) {
+            val newEvent = event.clone()
+            newEvents.add(newEvent)
+        }
+
+        return Day(newEvents, this.title)
+    }
 }

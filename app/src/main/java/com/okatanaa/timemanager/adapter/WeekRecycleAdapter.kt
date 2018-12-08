@@ -81,11 +81,5 @@ class WeekRecycleAdapter(val context: Context, val week: Week,
             }
             isBinded = true
         }
-         fun updateWithPayLoad(payloads: MutableList<Any>) {
-             if(payloads.isEmpty())
-                 return
-
-             (dayListView.adapter as DayListAdapter).notifyDataSetChanged()
-         }
     }
 }

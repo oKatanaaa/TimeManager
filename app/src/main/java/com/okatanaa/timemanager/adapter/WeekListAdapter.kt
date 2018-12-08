@@ -40,8 +40,6 @@ class WeekListAdapter(val context: Context, val weeks: ArrayList<Week>, val onWe
                 weekView.setBackgroundResource(R.drawable.week_current_look)
             else
                 weekView.setBackgroundResource(R.drawable.week_not_current_look)
-            //println("Event position ${position} isSelected: ${eventView.isSelected} setContains: ${this.selectedViews.contains(position)}")
-
 
             return weekView
     }

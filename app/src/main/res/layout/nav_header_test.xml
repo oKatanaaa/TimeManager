@@ -4,23 +4,12 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/nav_header_height"
+        android:layout_height="90dp"
         android:background="@drawable/side_nav_bar"
         android:theme="@style/ThemeOverlay.AppCompat.Dark"
         android:gravity="bottom"
         android:id="@+id/linearLayout">
 
-    <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/nav_header_vertical_spacing"
-            app:srcCompat="@mipmap/ic_launcher_round"
-            android:contentDescription="@string/nav_header_desc"
-            android:id="@+id/imageView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="80dp"/>
     <ImageButton
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -30,6 +19,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@android:color/transparent" android:onClick="addWeekBtnClicked"/>
+            android:background="@android:color/transparent" android:onClick="addWeekBtnClicked"
+    />
 
 </android.support.constraint.ConstraintLayout>

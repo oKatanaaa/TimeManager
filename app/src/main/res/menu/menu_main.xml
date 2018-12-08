@@ -10,6 +10,10 @@
           android:title="@string/action_rename_week"
           android:orderInCategory="1"
           app:showAsAction="never"/>
+    <item android:id="@+id/action_copy_week"
+          android:title="@string/action_copy_week"
+          android:orderInCategory="2"
+          app:showAsAction="never"/>
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
           android:orderInCategory="100"

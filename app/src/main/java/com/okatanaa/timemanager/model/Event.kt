@@ -82,4 +82,10 @@ class Event {
                 this.endTimeArr == other.endTimeArr
     }
 
+    @Synchronized fun clone(): Event {
+        val newEvent = Event()
+        newEvent.copy(this)
+        return newEvent
+    }
+
 }
