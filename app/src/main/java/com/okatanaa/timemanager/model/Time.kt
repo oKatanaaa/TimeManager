@@ -26,6 +26,8 @@ class Time {
         this.minutes = time[1]
     }
 
+
+
     @Throws(IllegalStateException::class)
     constructor(time: String) {
         if(time.length != 5)

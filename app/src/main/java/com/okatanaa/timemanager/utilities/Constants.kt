@@ -34,3 +34,7 @@ const val JSON_DEFAULT_DATA_WEEK_FILE = R.raw.default_week
 // REQUEST CODES
 const val RC_EVENT_ACTIVITY = 0
 const val RC_TEXT_EDITOR_ACTIVITY = 1
+
+// BUNDLE STRING KEYS
+
+const val BUNDLE_TIME = "time"

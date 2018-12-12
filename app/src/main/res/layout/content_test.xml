@@ -31,7 +31,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:onClick="onClickedMoveDownBtn"
                 app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp"
-                android:padding="6dp" android:text="Down"/>
+                android:padding="6dp" android:text="Down" android:layout_marginRight="30dp"/>
         <Button
                 android:layout_width="70dp"
                 android:layout_height="45dp"
@@ -43,7 +43,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:onClick="onClickedMoveUpBtn"
                 app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp"
-                android:padding="6dp" android:text="Up"/>
+                android:padding="6dp" android:text="Up" android:layout_marginLeft="30dp"/>
         <Button
                 android:layout_width="70dp"
                 android:layout_height="45dp"

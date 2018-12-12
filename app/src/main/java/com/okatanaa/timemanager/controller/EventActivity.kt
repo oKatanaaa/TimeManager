@@ -6,12 +6,14 @@ import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.model.Event
 import kotlinx.android.synthetic.main.activity_event.*
 import android.app.Activity
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import com.okatanaa.timemanager.additional_classes.TextClickedListener
+import com.okatanaa.timemanager.controller.fragments.TimePickerFragment
 import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.utilities.*
@@ -21,7 +23,8 @@ import kotlin.IllegalArgumentException
 import kotlin.math.round
 
 
-class EventActivity : AppCompatActivity() {
+class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
+
 
     lateinit var event : Event
     companion object {
@@ -29,6 +32,8 @@ class EventActivity : AppCompatActivity() {
         const val DESCRIPTION = "Description"
         const val START_TIME = "Start time"
         const val END_TIME = "End time"
+
+        const val NO_CHANGE = "No change"
     }
 
 
@@ -37,6 +42,8 @@ class EventActivity : AppCompatActivity() {
 
     var currentStartTime = 0
     var currentEndTime = Time.MINUTES_IN_DAY
+
+    var changingTime = NO_CHANGE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,10 +74,24 @@ class EventActivity : AppCompatActivity() {
         inWhatDayTxt.text = event?.inDay.toString()
 
         startTimeDynamicTxt.text = this.event.startTime.toString()
-        startTimeDynamicTxt.setOnClickListener { TextClickedListener.onClick(this, START_TIME, startTimeDynamicTxt.text.toString()) }
+        startTimeDynamicTxt.setOnClickListener {
+            this.changingTime = START_TIME
+            val timeBundle = Bundle()
+            timeBundle.putInt(BUNDLE_TIME, this.currentStartTime)
+            val timeFragment = TimePickerFragment()
+            timeFragment.arguments = timeBundle
+            timeFragment.show(supportFragmentManager, START_TIME)
+        }
 
         endTimeDynamicTxt.text = this.event.endTime.toString()
-        endTimeDynamicTxt.setOnClickListener { TextClickedListener.onClick(this, END_TIME, endTimeDynamicTxt.text.toString()) }
+        endTimeDynamicTxt.setOnClickListener {
+            this.changingTime = END_TIME
+            val timeBundle = Bundle()
+            timeBundle.putInt(BUNDLE_TIME, this.currentEndTime)
+            val timeFragment = TimePickerFragment()
+            timeFragment.arguments = timeBundle
+            timeFragment.show(supportFragmentManager, END_TIME)
+        }
     }
 
     fun setTimeBars() {
@@ -137,42 +158,43 @@ class EventActivity : AppCompatActivity() {
                     eventNameTxt.text = data?.getStringExtra(EXTRA_EDITED_VALUE)
                 DESCRIPTION ->
                     eventDescriptionTxt.text = data?.getStringExtra(EXTRA_EDITED_VALUE)
-                START_TIME ->
-                    try {
-                        val newTimeString = data?.getStringExtra(EXTRA_EDITED_VALUE)
-                        val newTime = Time(newTimeString)
-
-                        if(newTime.isBetween(Time(this.topTimeBorder), Time(this.currentEndTime))) {
-                            this.currentStartTime = newTime.toMinutes()
-                            startTimeDynamicTxt.text = newTimeString
-                        }
-                        else
-                            Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
-
-                    } catch (e: IllegalArgumentException) {
-                        println(e.message)
-                        Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
-                    }
-                END_TIME ->
-                    try {
-                        val newTimeString = data?.getStringExtra(EXTRA_EDITED_VALUE)
-                        val newTime = Time(newTimeString)
-
-                        if(newTime.isBetween(Time(this.currentStartTime), Time(this.bottomTimeBorder))) {
-                            this.currentEndTime = newTime.toMinutes()
-                            endTimeDynamicTxt.text = newTimeString
-                        }
-                        else
-                            Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
-
-                    } catch (e: IllegalArgumentException) {
-                        println(e.message)
-                        Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
-                    }
-
                 else ->
                     throw IllegalArgumentException("Unknown edited name!")
             }
+    }
+
+    /*
+    * This function is called when user presses OK btn on the TimePickerFragment(the dialog pops up when user presses
+    * any of time textviews: starttime or endtime),
+    * so the application has to change current start and end time
+    * and also change seekbars' progresses.
+     */
+    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+        when(this.changingTime) {
+            START_TIME -> {
+                val newTime = Time(hourOfDay, minute)
+
+                if (newTime.isBetween(Time(this.topTimeBorder), Time(this.currentEndTime))) {
+                    this.currentStartTime = newTime.toMinutes()
+                    startTimeDynamicTxt.text = newTime.toString()
+                    startTimeBar.progress = (1.0*(this.currentStartTime - this.topTimeBorder)/(this.currentEndTime - this.topTimeBorder) * 100).toInt()
+                } else
+                    Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
+            }
+            END_TIME -> {
+                val newTime = Time(hourOfDay, minute)
+
+                if (newTime.isBetween(Time(this.currentStartTime), Time(this.bottomTimeBorder))) {
+                    this.currentEndTime = newTime.toMinutes()
+                    endTimeDynamicTxt.text = newTime.toString()
+                    endTimeBar.progress = (1.0*(this.currentEndTime - this.currentStartTime)/(this.bottomTimeBorder - this.currentStartTime) * 100).toInt()
+                } else
+                    Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
+            }
+            else -> throw IllegalArgumentException("Unknown changing type! Passed: ${this.changingTime}")
+        }
+
+        this.changingTime = NO_CHANGE
     }
 
     override fun onDestroy() {
