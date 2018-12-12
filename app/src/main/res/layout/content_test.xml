@@ -21,43 +21,65 @@
             android:background="#7b262626">
 
         <Button
-                android:layout_width="77dp"
-                android:layout_height="45dp"
-                android:id="@+id/moveDownBtn"
-                android:background="@drawable/move_btn_look"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="30dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:onClick="onClickedMoveDownBtn"
-                app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp"
-                android:padding="6dp" android:text="Down" android:layout_marginRight="30dp"/>
-        <Button
                 android:layout_width="70dp"
                 android:layout_height="45dp"
                 android:id="@+id/moveUpBtn"
                 android:background="@drawable/move_btn_look"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="30dp"
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:onClick="onClickedMoveUpBtn"
-                app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp"
-                android:padding="6dp" android:text="Up" android:layout_marginLeft="30dp"/>
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="8dp"
+                android:padding="6dp"
+                android:text="@string/up"
+                app:layout_constraintVertical_bias="1.0"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toStartOf="@+id/deleteBtn"
+                android:layout_marginRight="8dp"/>
+        <Button
+                android:text="@string/delete"
+                android:layout_width="70dp"
+                android:layout_height="45dp"
+                android:id="@+id/deleteBtn"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/move_btn_look" android:onClick="onDeleteBtnClicked"/>
         <Button
                 android:layout_width="70dp"
                 android:layout_height="45dp"
                 android:id="@+id/moveDoneBtn"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/moveDownBtn"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintStart_toEndOf="@+id/moveUpBtn"
-                android:layout_marginStart="8dp"
                 android:onClick="onClickedMoveDoneBtn"
                 android:background="@drawable/move_btn_look"
-                app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp"
-                android:text="@string/done"/>
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="8dp"
+                android:text="@string/done"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                android:layout_marginLeft="8dp"/>
+        <Button
+                android:layout_width="77dp"
+                android:layout_height="45dp"
+                android:id="@+id/moveDownBtn"
+                android:background="@drawable/move_btn_look"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:onClick="onClickedMoveDownBtn"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="8dp"
+                android:padding="6dp"
+                android:text="@string/down"
+                app:layout_constraintVertical_bias="0.0" app:layout_constraintStart_toEndOf="@+id/moveDoneBtn"
+                android:layout_marginStart="8dp" android:layout_marginLeft="8dp"/>
+        <android.support.constraint.Guideline android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                              android:id="@+id/guideline" app:layout_constraintGuide_begin="180dp"
+                                              android:orientation="vertical"/>
     </android.support.constraint.ConstraintLayout>
 
     <android.support.v7.widget.RecyclerView

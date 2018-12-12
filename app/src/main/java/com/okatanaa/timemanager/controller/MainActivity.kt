@@ -239,9 +239,12 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     /// EVENT INTERACTION
 
     override fun onBackPressed() {
+        println("Back is pressed!")
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
+        } else if(moveLayout.isEnabled){
+            onClickedMoveDoneBtn(View(this))
+        }else{
             super.onBackPressed()
         }
     }
@@ -279,6 +282,29 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         }
         this.listView.adapter.addSelectedView(this.eventPosition)
         this.listView.adapter.notifyDataSetChanged()
+    }
+
+    fun onDeleteBtnClicked(view: View) {
+        if(this.listView.adapter.count == 1) {
+            this.listView.adapter.removeAllSelectedViews()
+            this.listView.adapter.day.deleteEvent(0)
+            this.listView.adapter.notifyDataSetChanged()
+            onClickedMoveDoneBtn(View(this))
+            return
+        }
+
+        if(this.eventPosition == this.listView.adapter.count - 1) {
+            this.listView.adapter.removeSelectedView(this.eventPosition)
+            this.listView.adapter.day.deleteEvent(this.eventPosition)
+            this.listView.adapter.addSelectedView(this.eventPosition - 1)
+            this.eventPosition = this.eventPosition - 1
+            this.listView.adapter.notifyDataSetChanged()
+            return
+        }
+
+        this.listView.adapter.day.deleteEvent(this.eventPosition)
+        this.listView.adapter.notifyDataSetChanged()
+
     }
 
     override fun onEventClicked(event: Event, adapter: DayListAdapter, position: Int) {
@@ -425,10 +451,6 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         }
 
     }
-
-
-
-
 
     companion object {
         const val WEEK_NAME = "Week name"

@@ -76,11 +76,22 @@ class DayListAdapter(val context: Context, val day: Day, val onEventClickListene
         return day.eventCount()
     }
 
+
+    /*
+    * The adapter contains a list of selected views in order to draw them correctly.
+    * After creating a view adapter checks if the view at this position is selected and if it is,
+    * adapter changes view's background.
+    * This functions add selection of a view at the particular position.
+     */
     fun addSelectedView(position: Int) {
         this.selectedViews.add(position)
         println(this.selectedViews)
     }
 
+    /*
+    * The adapter contains a list of selected views in order to draw them correctly.
+    * This functions deletes selection of a view at the particular position.
+     */
     fun removeSelectedView(position: Int) {
         if(!this.selectedViews.contains(position))
             throw NoSuchElementException("This view is not selected!")
