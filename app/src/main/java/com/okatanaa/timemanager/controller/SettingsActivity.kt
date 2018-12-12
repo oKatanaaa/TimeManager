@@ -31,7 +31,7 @@ class SettingsActivity : AppCompatActivity() {
             Settings.globalStartTime = newTime
             globalStartTimeTxt.text = newTime.toString()
         } catch (e: IllegalArgumentException) {
-            Toast.makeText(this, "Wrong time value!", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "Wrong time value!", Toast.LENGTH_SHORT).show()
         }
     }
 
