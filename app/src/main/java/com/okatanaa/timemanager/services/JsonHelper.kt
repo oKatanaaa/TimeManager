@@ -3,6 +3,7 @@ package com.okatanaa.timemanager.services
 import android.content.Context
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
+import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.utilities.*
 import org.json.JSONArray
@@ -128,6 +129,13 @@ class JsonHelper {
             json.put(JSON_EVENT_END_TIME, jsonArrayEndTime)
 
             return json
+        }
+
+        fun readSettings(json: JSONObject) {
+            val settingsJson = json.getJSONObject(JSON_SETTINGS)
+            val jsonTimeArray = settingsJson.getJSONArray(JSON_GLOBAL_START_TIME)
+            val time = Time(jsonTimeArray[0] as Int, jsonTimeArray[1] as Int)
+            Settings.globalStartTime = time
         }
     }
 }

@@ -25,7 +25,14 @@
 
         <activity android:name=".controller.TextEditorActivity">
         </activity>
-
+        <activity
+                android:name=".controller.SettingsActivity"
+                android:label="@string/title_activity_settings"
+                android:parentActivityName=".controller.MainActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.okatanaa.timemanager.controller.MainActivity"/>
+        </activity>
     </application>
 
 </manifest>

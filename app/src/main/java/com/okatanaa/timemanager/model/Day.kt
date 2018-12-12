@@ -1,8 +1,5 @@
 package com.okatanaa.timemanager.model
 
-import android.widget.Adapter
-import android.widget.BaseAdapter
-import android.widget.SpinnerAdapter
 
 class Day {
     @Volatile private var events: ArrayList<Event>
@@ -21,8 +18,8 @@ class Day {
     @Synchronized fun addNewEvent(event: Event): Boolean {
         if(this.eventCount() == 0) {
             event.setDay(this)
-            event.smartSetStartTime(Time(0))
-            event.smartSetEndTime(Time(30))
+            event.smartSetStartTime(com.okatanaa.timemanager.services.Settings.globalStartTime)
+            event.smartSetEndTime(Time(com.okatanaa.timemanager.services.Settings.globalStartTime.toMinutes() + 30))
             this.events.add(event)
             return true
         }

@@ -37,6 +37,7 @@ import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.DataService
 import com.okatanaa.timemanager.services.JsonHelper
+import com.okatanaa.timemanager.services.Settings
 import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.activity_test.*
 import kotlinx.android.synthetic.main.app_bar_test.*
@@ -83,6 +84,9 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         this.weekListAdapter = WeekListAdapter(this, DataService.weekArray, this)
         week_list_view.adapter = this.weekListAdapter
 
+        // Load Settings
+        JsonHelper.readSettings(JsonHelper.readJSON(this))
+
         // Set the data will be worked on
         this.week = DataService.currentWeek
         this.handler = Handler() {
@@ -117,7 +121,10 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
-            R.id.action_settings -> return true
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                return true
+            }
             R.id.action_delete_week -> {
                 return deleteCurrentWeek()
             }
@@ -214,6 +221,13 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
             jsonArray.put(JsonHelper.weekToJson(DataService.weekArray[i]))
         }
         json.put(JSON_WEEKS, jsonArray)
+
+        val jsonSettings = JSONObject()
+        val jsonTimeArray = JSONArray()
+        jsonTimeArray.put(Settings.globalStartTime.hours)
+        jsonTimeArray.put(Settings.globalStartTime.minutes)
+        jsonSettings.put(JSON_GLOBAL_START_TIME, jsonTimeArray)
+        json.put(JSON_SETTINGS, jsonSettings)
         this.openFileOutput(JSON_PRIMARY_DATA_WEEK_FILE, Context.MODE_PRIVATE).use {
             it.write(json.toString().toByteArray())
         }
