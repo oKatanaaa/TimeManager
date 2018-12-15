@@ -51,8 +51,6 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
         setSupportActionBar(toolbar)
         setEventData()
         setTextViews()
-        setTimeBars()
-        setTimeBarListeners()
     }
 
     fun setEventData() {
@@ -92,16 +90,6 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
             timeFragment.arguments = timeBundle
             timeFragment.show(supportFragmentManager, END_TIME)
         }
-    }
-
-    fun setTimeBars() {
-        startTimeBar.progress = ((1.0 * (this.currentStartTime - this.topTimeBorder) / (this.currentEndTime - this.topTimeBorder)) * 100).toInt()
-        endTimeBar.progress = ((1.0 * (this.currentEndTime - this.currentStartTime) / (this.bottomTimeBorder - this.currentStartTime)) * 100).toInt()
-    }
-
-    fun setTimeBarListeners() {
-        startTimeBar.setOnSeekBarChangeListener(StartTimeBarListener())
-        endTimeBar.setOnSeekBarChangeListener(EndTimeBarListener())
     }
 
     fun updateTimeFields() {
@@ -177,7 +165,6 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
                 if (newTime.isBetween(Time(this.topTimeBorder), Time(this.currentEndTime))) {
                     this.currentStartTime = newTime.toMinutes()
                     startTimeDynamicTxt.text = newTime.toString()
-                    startTimeBar.progress = (1.0*(this.currentStartTime - this.topTimeBorder)/(this.currentEndTime - this.topTimeBorder) * 100).toInt()
                 } else
                     Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
             }
@@ -187,7 +174,6 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
                 if (newTime.isBetween(Time(this.currentStartTime), Time(this.bottomTimeBorder))) {
                     this.currentEndTime = newTime.toMinutes()
                     endTimeDynamicTxt.text = newTime.toString()
-                    endTimeBar.progress = (1.0*(this.currentEndTime - this.currentStartTime)/(this.bottomTimeBorder - this.currentStartTime) * 100).toInt()
                 } else
                     Toast.makeText(this, "Incorrect time value!", Toast.LENGTH_SHORT).show()
             }
@@ -201,37 +187,6 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
         super.onDestroy()
         setResult(Activity.RESULT_CANCELED, Intent())
         finish()
-    }
-
-
-    inner class StartTimeBarListener: SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            val timeBetweenCurrentAndTop = this@EventActivity.currentEndTime - this@EventActivity.topTimeBorder
-            this@EventActivity.currentStartTime = this@EventActivity.topTimeBorder + (timeBetweenCurrentAndTop * 1.0 * progress / 100.0).toInt()
-            this@EventActivity.updateTimeFields()
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        }
-
-    }
-
-    inner class EndTimeBarListener: SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            val timeBetweenCurrentAndBot = this@EventActivity.bottomTimeBorder - this@EventActivity.currentStartTime
-            this@EventActivity.currentEndTime = this@EventActivity.currentStartTime + (timeBetweenCurrentAndBot * 1.0 * progress / 100.0).toInt()
-            this@EventActivity.updateTimeFields()
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        }
-
     }
 
 }
