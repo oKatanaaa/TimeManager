@@ -14,6 +14,7 @@ const val EXTRA_EDITED_VALUE = "edited_value"
 const val EXTRA_ACTION = "action"
 const val EXTRA_TOP_TIME_BORDER = "top time border"
 const val EXTRA_BOTTOM_TIME_BORDER = "bottom time border"
+const val EXTRA_EVENT_POSITION = "event_position"
 
 // JSON DATA
 const val JSON_NAME = "name"
@@ -26,6 +27,7 @@ const val JSON_EVENT_END_TIME = "end_time"
 const val JSON_IN_DAY = "in_day"
 const val JSON_GLOBAL_START_TIME = "global_start_time"
 const val JSON_SETTINGS = "settings"
+const val JSON_COLOR = "color"
 
 // JSON FILENAME
 const val JSON_PRIMARY_DATA_WEEK_FILE = "primary_data.json"

@@ -23,7 +23,8 @@ import kotlin.IllegalArgumentException
 import kotlin.math.round
 
 
-class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
+class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener,
+    AdapterView.OnItemSelectedListener{
 
 
     lateinit var event : Event
@@ -44,6 +45,7 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
     var currentEndTime = Time.MINUTES_IN_DAY
 
     var changingTime = NO_CHANGE
+    var eventPosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +53,13 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
         setSupportActionBar(toolbar)
         setEventData()
         setTextViews()
+        ArrayAdapter.createFromResource(this, R.array.colors, android.R.layout.simple_spinner_item)
+            .also { adapter ->
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                colorSpinner.adapter = adapter
+            }
+        colorSpinner.onItemSelectedListener = this
+        colorSpinner.setSelection(event.color)
     }
 
     fun setEventData() {
@@ -61,6 +70,7 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
         this.bottomTimeBorder = intent.getIntExtra(EXTRA_BOTTOM_TIME_BORDER, this.bottomTimeBorder)
         this.currentStartTime = event.startTime.toMinutes()
         this.currentEndTime = event.endTime.toMinutes()
+        this.eventPosition = intent.getIntExtra(EXTRA_EVENT_POSITION, 0)
     }
 
     fun setTextViews() {
@@ -113,9 +123,39 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
         }
     }
 
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        when(position) {
+            0 -> {
+                colorSpinner.setBackgroundResource(R.drawable.color_circle)
+                this.event.color = Event.NONE
+            }
+            1 -> {
+                colorSpinner.setBackgroundResource(R.drawable.color_circle_yellow)
+                this.event.color = Event.YELLOW
+            }
+            2 -> {
+                colorSpinner.setBackgroundResource(R.drawable.color_circle_blue)
+                this.event.color = Event.BLUE
+            }
+            3 -> {
+                colorSpinner.setBackgroundResource(R.drawable.color_circle_green)
+                this.event.color = Event.GREEN
+            }
+            4 -> {
+                colorSpinner.setBackgroundResource(R.drawable.color_circle_red)
+                this.event.color = Event.RED
+            }
+        }
+    }
+    override fun onNothingSelected(parent: AdapterView<*>) {
+        // Another interface callback
+    }
+
+
     fun actionDeleteEvent(): Boolean {
         val resultIntent = Intent()
         resultIntent.putExtra(EXTRA_ACTION, ACTION_DELETE)
+        resultIntent.putExtra(EXTRA_EVENT_POSITION, this.eventPosition)
         setResult(Activity.RESULT_OK, resultIntent)
         println("Finish")
         finish()
@@ -131,6 +171,7 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {
         val resultIntent = Intent()
         resultIntent.putExtra(EXTRA_EVENT_JSON, JsonHelper.eventToJson(event).toString())
         resultIntent.putExtra(EXTRA_ACTION, ACTION_SAVE)
+        resultIntent.putExtra(EXTRA_EVENT_POSITION, this.eventPosition)
         setResult(Activity.RESULT_OK, resultIntent)
         println("Finish")
         finish()

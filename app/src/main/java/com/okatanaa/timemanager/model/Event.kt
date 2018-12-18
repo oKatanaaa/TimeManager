@@ -7,6 +7,8 @@ class Event {
     var startTimeArr: ArrayList<Int>
     var endTimeArr: ArrayList<Int>
     lateinit var inDay: Day
+    var color: Int
+
     @Volatile var isCurrent = false
 
     @Volatile lateinit var startTime: Time
@@ -16,12 +18,14 @@ class Event {
                 description: String = "",
                 startTime: ArrayList<Int> = arrayListOf(0,0),
                 endTime: ArrayList<Int> = arrayListOf(0,0),
-                inDay: Day = Day(title = "No day")) {
+                inDay: Day = Day(title = "No day"),
+                color: Int = Event.NONE) {
         this.name = name
         this.description = description
         this.startTimeArr = startTime
         this.endTimeArr = endTime
         this.inDay = inDay
+        this.color = color
 
         this.startTime = Time(this.startTimeArr[0], this.startTimeArr[1])
         this.endTime = Time(this.endTimeArr[0], this.endTimeArr[1])
@@ -34,6 +38,7 @@ class Event {
         this.startTimeArr = other.startTimeArr.clone() as ArrayList<Int>
         this.endTimeArr = other.endTimeArr.clone() as ArrayList<Int>
         this.inDay = other.inDay
+        this.color = other.color
         this.startTime = Time(this.startTimeArr)
         this.endTime = Time(this.endTimeArr)
         return this
@@ -86,6 +91,14 @@ class Event {
         val newEvent = Event()
         newEvent.copy(this)
         return newEvent
+    }
+
+    companion object {
+        const val RED = 4
+        const val GREEN = 3
+        const val YELLOW = 1
+        const val BLUE = 2
+        const val NONE = 0
     }
 
 }

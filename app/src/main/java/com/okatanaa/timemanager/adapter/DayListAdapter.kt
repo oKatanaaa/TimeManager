@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
@@ -14,6 +15,7 @@ import kotlinx.android.synthetic.main.day_item.view.*
 
 class DayListAdapter(val context: Context, val day: Day, val onEventClickListener: OnEventClickListener) : BaseAdapter() {
     val selectedViews: MutableSet<Int> = mutableSetOf()
+    var pickedEventPosition = -1
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         synchronized(day) {
@@ -27,6 +29,7 @@ class DayListAdapter(val context: Context, val day: Day, val onEventClickListene
                 holder.eventNameTxt = eventView.findViewById(R.id.eventNameTxt)
                 holder.startTimeTxt = eventView.findViewById(R.id.startTimeLbl)
                 holder.endTimeTxt = eventView.findViewById(R.id.endTimeLbl)
+                holder.eventColor = eventView.findViewById(R.id.eventColor)
                 eventView.tag = holder
             } else {
                 holder = convertView.tag as ViewHolder
@@ -37,7 +40,13 @@ class DayListAdapter(val context: Context, val day: Day, val onEventClickListene
             holder.eventNameTxt?.text = event.name
             holder.startTimeTxt?.text = event.startTime.toString()
             holder.endTimeTxt?.text = event.endTime.toString()
-
+            when(event.color) {
+                Event.BLUE -> holder.eventColor?.setImageResource(R.drawable.color_circle_blue)
+                Event.GREEN -> holder.eventColor?.setImageResource(R.drawable.color_circle_green)
+                Event.NONE -> holder.eventColor?.setImageResource(R.drawable.color_circle_null)
+                Event.RED -> holder.eventColor?.setImageResource(R.drawable.color_circle_red)
+                Event.YELLOW -> holder.eventColor?.setImageResource(R.drawable.color_circle_yellow)
+            }
             // Make events in the list clickable!
             // We need to update listener each time because otherwise
             // event activity would get another event(not one you clicked on)
@@ -110,6 +119,7 @@ class DayListAdapter(val context: Context, val day: Day, val onEventClickListene
         var eventNameTxt: TextView? = null
         var startTimeTxt: TextView? = null
         var endTimeTxt: TextView? = null
+        var eventColor: ImageView? = null
     }
 
     fun addEvent() {

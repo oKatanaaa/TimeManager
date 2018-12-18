@@ -11,21 +11,24 @@
               "description": "You can write here any information you need. Click me to change me! You can change event name the same way.",
               "in_day": "Monday",
               "start_time": [9, 0],
-              "end_time": [10, 30]
+              "end_time": [10, 30],
+              "color": 1
             },
             {
               "name": "And me!",
               "description": "Cells you see in the day called events. Event can be anything you want: lesson, hobby time, rest and etc.",
               "in_day": "Monday",
               "start_time": [10, 30],
-              "end_time": [11, 30]
+              "end_time": [11, 30],
+              "color": 2
             },
             {
               "name": "Me too!",
               "description": "The application synchronizes with current time and highlights the event is happening now!\nTry to change the time intervals of this event to match your current time.\n You can do this using seek bars. Also, you can explicitly enter your time, just click on the time icons.",
               "in_day": "Monday",
               "start_time": [12, 0],
-              "end_time": [13, 30]
+              "end_time": [13, 30],
+              "color": 3
             }
           ]
         },
@@ -63,28 +66,7 @@
         },
         {
           "name": "Tuesday",
-          "events": [
-            {
-            "name": "Call this event as you want!",
-            "description": "Describe this event!",
-            "in_day": "Monday",
-            "start_time": [9, 0],
-            "end_time": [10, 30]
-          },
-            {
-              "name": "Call this event as you want1!",
-              "description": "Describe this event!",
-              "in_day": "Monday",
-              "start_time": [10, 31],
-              "end_time": [11, 30]
-            },
-            {
-              "name": "Call this event as you want2!\nCall this event as you want2!\nCall this event as you want2!\nCall this event as you want2!\nCall this event as you want2!Call this event as you want2!Call this event as you want2!",
-              "description": "Describe this event!",
-              "in_day": "Monday",
-              "start_time": [12, 0],
-              "end_time": [13, 30]
-            }]
+          "events": []
         },
         {
           "name": "Wednesday",

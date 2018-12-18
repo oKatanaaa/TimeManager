@@ -1,40 +1,30 @@
 package com.okatanaa.timemanager.controller
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.support.annotation.RequiresApi
 import android.support.constraint.ConstraintSet
-import android.support.constraint.Constraints
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.PagerAdapter
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
-import android.widget.Toast
+import android.widget.*
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.adapter.DayListAdapter
 import com.okatanaa.timemanager.adapter.WeekListAdapter
-import com.okatanaa.timemanager.adapter.WeekRecycleAdapter
 import com.okatanaa.timemanager.additional_classes.TextClickedListener
-import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import com.okatanaa.timemanager.interfaces.OnEventClickListener
 import com.okatanaa.timemanager.interfaces.OnEventLongClickListener
 import com.okatanaa.timemanager.interfaces.OnWeekClickListener
-import com.okatanaa.timemanager.model.CalendarSynchronizer
-import com.okatanaa.timemanager.model.Event
-import com.okatanaa.timemanager.model.Time
-import com.okatanaa.timemanager.model.Week
+import com.okatanaa.timemanager.model.*
 import com.okatanaa.timemanager.services.DataService
 import com.okatanaa.timemanager.services.JsonHelper
 import com.okatanaa.timemanager.services.Settings
@@ -42,27 +32,18 @@ import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.activity_test.*
 import kotlinx.android.synthetic.main.app_bar_test.*
 import kotlinx.android.synthetic.main.content_test.*
+import kotlinx.android.synthetic.main.week_item_fragment_content.view.*
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.IllegalStateException
+import java.lang.NullPointerException
 
-class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChangedListener, OnWeekClickListener,
-    OnEventLongClickListener{
+class MainActivity : AppCompatActivity(),  OnWeekClickListener {
     // Permanent data
-    lateinit var weekAdapter: WeekRecycleAdapter
+    lateinit var weekAdapter: WeekPagerAdapter
     lateinit var week: Week
     var currentWeekPosition: Int = 0
     lateinit var calendarSynchronizer: CalendarSynchronizer
     lateinit var weekListAdapter: WeekListAdapter
-
-    // Data for modifying events
-    lateinit var modifyingEvent: Event
-    var modifyingEventPosition: Int = 0
-    lateinit var modifyingAdapter: DayListAdapter
-
-    // Data for move buttons
-    lateinit var listView: AdapterView<DayListAdapter>
-    var eventPosition: Int = 0
 
     lateinit var handler: Handler
 
@@ -91,22 +72,28 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         this.week = DataService.currentWeek
         this.handler = Handler() {
             val  dayPosition = it.what.toInt()
-            this.weekAdapter?.notifyItemChanged(dayPosition)
+            (this.weekAdapter.getItem(weekViewPager.currentItem) as WeekItemFragment)
+                .updateCurrentEvent()
             true
+
         }
         this.calendarSynchronizer = CalendarSynchronizer(this.week, this.handler)
 
-        setWeekRecycleAdapter()
+        weekViewPager.offscreenPageLimit = 7
+        this.weekAdapter = WeekPagerAdapter(supportFragmentManager)
+        weekViewPager.adapter = this.weekAdapter
+
+
         setMoveButtons()
-        weekRecycleView.scrollToPosition(this.calendarSynchronizer.currentWeekDayNum)
+        weekViewPager.currentItem = this.calendarSynchronizer.currentWeekDayNum
     }
 
-    fun reloadData() {
+    private fun reloadData() {
         this.week = DataService.currentWeek
         this.calendarSynchronizer.stopSynchronizingThread()
         this.calendarSynchronizer = CalendarSynchronizer(this.week, this.handler)
-        setWeekRecycleAdapter()
-        weekRecycleView.scrollToPosition(this.calendarSynchronizer.currentWeekDayNum)
+        weekAdapter.notifyDataSetChanged()
+        weekViewPager.currentItem = this.calendarSynchronizer.currentWeekDayNum
     }
 
 
@@ -143,63 +130,12 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         }
     }
 
-
-    fun setWeekRecycleAdapter() {
-        this.weekAdapter = WeekRecycleAdapter(
-            this, this.week, this, this)
-
-        weekRecycleView.adapter = this.weekAdapter
-
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        weekRecycleView.layoutManager = layoutManager
-        weekRecycleView.setHasFixedSize(true)
-        (weekRecycleView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-    }
-
-    fun setMoveButtons() {
-        moveLayout.alpha = 0F
-        moveLayout.isEnabled = false
-
-        moveUpBtn.alpha = 0F
-        moveUpBtn.isEnabled = false
-        moveDoneBtn.alpha = 0F
-        moveDoneBtn.isEnabled = false
-        moveDownBtn.alpha = 0F
-        moveDownBtn.isEnabled = false
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_CANCELED)
             return
+
         when (requestCode) {
-            RC_EVENT_ACTIVITY -> {
-                if (data?.getStringExtra(EXTRA_ACTION) == ACTION_SAVE) {
-                    // Receive changed event
-                    val changedEventJsonString = data?.getStringExtra(EXTRA_EVENT_JSON)
-                    val changedEventJson = JSONObject(changedEventJsonString)
-                    val changedEvent = JsonHelper.eventFromJson(changedEventJson)
-                    // Change picked event data to received data
-                    this.modifyingEvent.copy(changedEvent)
-                    this.modifyingAdapter.notifyDataSetChanged()
-                }
-
-                if (data?.getStringExtra(EXTRA_ACTION) == ACTION_DELETE) {
-                    synchronized(this.modifyingAdapter.day) {
-                        this.modifyingAdapter.day.deleteEvent(this.modifyingEventPosition)
-                    }
-                    this.modifyingAdapter.notifyDataSetChanged()
-                }
-
-                this.weekAdapter.notifyDataSetChanged()
-                val scrollPosition = findViewById<RecyclerView>(R.id.weekRecycleView).scrollState
-                weekRecycleView.layoutManager?.scrollHorizontallyBy(
-                    scrollPosition,
-                    weekRecycleView.Recycler(),
-                    RecyclerView.State()
-                )
-                println("DONE")
-            }
             RC_TEXT_EDITOR_ACTIVITY -> {
                 val newWeekName = data?.getStringExtra(EXTRA_EDITED_VALUE)
                 this.week.name = newWeekName!!
@@ -214,7 +150,21 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         println("onPause")
     }
 
-    fun saveData() {
+    private fun setMoveButtons() {
+        moveLayout.alpha = 0F
+        moveLayout.isEnabled = false
+
+        moveUpBtn.alpha = 0F
+        moveUpBtn.isEnabled = false
+        moveDoneBtn.alpha = 0F
+        moveDoneBtn.isEnabled = false
+        moveDownBtn.alpha = 0F
+        moveDownBtn.isEnabled = false
+    }
+
+
+
+    private fun saveData() {
         val json = JSONObject()
         val jsonArray = JSONArray()
         for (i in 0 until DataService.weekArray.count()) {
@@ -250,139 +200,86 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
     }
 
     fun onClickedMoveUpBtn(view: View) {
-        this.listView.adapter.removeSelectedView(this.eventPosition)
-        synchronized(this.listView.adapter.day) {
-            if (this.listView.adapter.day.moveEventUp(this.eventPosition)) {
-                this.eventPosition = this.eventPosition - 1
+        val day = this.week.getDay(weekViewPager.currentItem)
+        val fragmentAdapter = weekViewPager.focusedChild.findViewById<ListView>(R.id.eventListView).adapter
+                as DayListAdapter
+        val pickedEventPosition = fragmentAdapter.pickedEventPosition
+        fragmentAdapter.removeSelectedView(pickedEventPosition)
+        synchronized(day) {
+            if (day.moveEventUp(pickedEventPosition)) {
+                fragmentAdapter.pickedEventPosition = pickedEventPosition - 1
             }
         }
-        this.listView.adapter.addSelectedView(this.eventPosition)
-        this.listView.adapter.notifyDataSetChanged()
+        fragmentAdapter.addSelectedView(fragmentAdapter.pickedEventPosition)
+        fragmentAdapter.notifyDataSetChanged()
     }
 
-
+    /*
+    * This method can be called from onDeleteBtnClicked.
+    * If it is called from onDeleteBtnClicked it causes NullPointerException because
+    * adapter of the eventListView is destroyed because of lack of elements(???).
+     */
     fun onClickedMoveDoneBtn(view: View) {
-        this.listView.adapter.removeAllSelectedViews()
-        this.listView.adapter.notifyDataSetChanged()
-        setMoveButtons()
+        try {
+            val fragmentAdapter = weekViewPager.focusedChild.findViewById<ListView>(R.id.eventListView)
+                .adapter as DayListAdapter
+            fragmentAdapter.removeAllSelectedViews()
+            fragmentAdapter.notifyDataSetChanged()
 
-        val newConstraintSet = ConstraintSet()
-        newConstraintSet.clone(contentTestLayout)
-        newConstraintSet.connect(R.id.weekRecycleView, ConstraintSet.BOTTOM, R.id.contentTestLayout, ConstraintSet.BOTTOM)
-        newConstraintSet.applyTo(contentTestLayout)
+        } catch (e: NullPointerException) { }
+        finally {
+            setMoveButtons()
+            val newConstraintSet = ConstraintSet()
+            newConstraintSet.clone(contentTestLayout)
+            newConstraintSet.connect(R.id.weekViewPager, ConstraintSet.BOTTOM, R.id.contentTestLayout, ConstraintSet.BOTTOM)
+            newConstraintSet.applyTo(contentTestLayout)
+        }
     }
-
 
     fun onClickedMoveDownBtn(view: View) {
-        this.listView.adapter.removeSelectedView(this.eventPosition)
-        synchronized(this.listView.adapter.day) {
-            if (this.listView.adapter.day.moveEventDown(this.eventPosition)) {
-                this.eventPosition = this.eventPosition + 1
+        val day = this.week.getDay(weekViewPager.currentItem)
+        val fragmentAdapter = weekViewPager.focusedChild.findViewById<ListView>(R.id.eventListView).adapter
+            as DayListAdapter
+        val pickedEventPosition = fragmentAdapter.pickedEventPosition
+        fragmentAdapter.removeSelectedView(pickedEventPosition)
+        synchronized(day) {
+            if (day.moveEventDown(pickedEventPosition)) {
+                fragmentAdapter.pickedEventPosition = pickedEventPosition + 1
             }
         }
-        this.listView.adapter.addSelectedView(this.eventPosition)
-        this.listView.adapter.notifyDataSetChanged()
+        fragmentAdapter.addSelectedView(fragmentAdapter.pickedEventPosition)
+        fragmentAdapter.notifyDataSetChanged()
     }
 
     fun onDeleteBtnClicked(view: View) {
-        if(this.listView.adapter.count == 1) {
-            this.listView.adapter.removeAllSelectedViews()
-            this.listView.adapter.day.deleteEvent(0)
-            this.listView.adapter.notifyDataSetChanged()
+        val day = this.week.getDay(weekViewPager.currentItem)
+        val fragmentAdapter = weekViewPager.focusedChild.findViewById<ListView>(R.id.eventListView).adapter
+                as DayListAdapter
+        val pickedEventPosition = fragmentAdapter.pickedEventPosition
+
+        if(fragmentAdapter.count == 1) {
+            fragmentAdapter.removeAllSelectedViews()
+            fragmentAdapter.day.deleteEvent(0)
+            fragmentAdapter.notifyDataSetChanged()
             onClickedMoveDoneBtn(View(this))
             return
         }
 
-        if(this.eventPosition == this.listView.adapter.count - 1) {
-            this.listView.adapter.removeSelectedView(this.eventPosition)
-            this.listView.adapter.day.deleteEvent(this.eventPosition)
-            this.listView.adapter.addSelectedView(this.eventPosition - 1)
-            this.eventPosition = this.eventPosition - 1
-            this.listView.adapter.notifyDataSetChanged()
+        if(pickedEventPosition == fragmentAdapter.count - 1) {
+            fragmentAdapter.removeSelectedView(pickedEventPosition)
+            day.deleteEvent(pickedEventPosition)
+            fragmentAdapter.addSelectedView(pickedEventPosition - 1)
+            fragmentAdapter.pickedEventPosition = pickedEventPosition - 1
+            fragmentAdapter.notifyDataSetChanged()
             return
         }
 
-        this.listView.adapter.day.deleteEvent(this.eventPosition)
-        this.listView.adapter.notifyDataSetChanged()
+        day.deleteEvent(pickedEventPosition)
+        fragmentAdapter.notifyDataSetChanged()
 
     }
 
-    override fun onEventClicked(event: Event, adapter: DayListAdapter, position: Int) {
-        println("Event clicked!")
-        this.modifyingEvent = event
-        this.modifyingEventPosition = position
-        this.modifyingAdapter = adapter
 
-        var topTimeBorder: Int = 0
-        var bottomTimeBorder: Int = Time.MINUTES_IN_DAY
-
-        // There is the only event in day
-        if (position == 0 && adapter.count == 1) {
-            topTimeBorder = 0
-            bottomTimeBorder = Time.MINUTES_IN_DAY
-        }
-        // This event is first, but there is other events
-        else if (position == 0 && adapter.count > 1) {
-            val belowEvent = adapter.getItem(position + 1) as Event
-            topTimeBorder = 0
-            bottomTimeBorder = belowEvent.startTime.toMinutes()
-        }
-        // There are many events and this event is somewhere in the middle of list
-        else if (position != 0 && position < adapter.count - 1) {
-            val aboveEvent = adapter.getItem(position - 1) as Event
-            val belowEvent = adapter.getItem(position + 1) as Event
-            topTimeBorder = aboveEvent.endTime.toMinutes()
-            bottomTimeBorder = belowEvent.startTime.toMinutes()
-        }
-        // There are many events and this event is the last one
-        else if (position == adapter.count - 1) {
-            val aboveEvent = adapter.getItem(position - 1) as Event
-            topTimeBorder = aboveEvent.endTime.toMinutes()
-            bottomTimeBorder = Time.MINUTES_IN_DAY
-        }
-
-        val eventIntent = Intent(this@MainActivity, EventActivity::class.java)
-        val eventJson = JsonHelper.eventToJson(event)
-
-        eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
-        eventIntent.putExtra(EXTRA_TOP_TIME_BORDER, topTimeBorder)
-        eventIntent.putExtra(EXTRA_BOTTOM_TIME_BORDER, bottomTimeBorder)
-        startActivityForResult(eventIntent, RC_EVENT_ACTIVITY)
-    }
-
-    override fun onEventLongClicked(parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long): Boolean {
-        this@MainActivity.listView = parent
-        this@MainActivity.eventPosition = position
-
-        if (parent.adapter.getSelectedViewsCount() > 0)
-            parent.adapter.removeAllSelectedViews()
-
-        parent.adapter.addSelectedView(position)
-        parent.adapter.notifyDataSetChanged()
-
-        val newConstraintSet = ConstraintSet()
-        newConstraintSet.clone(contentTestLayout)
-        newConstraintSet.connect(R.id.weekRecycleView, ConstraintSet.BOTTOM, R.id.moveLayout, ConstraintSet.TOP)
-        newConstraintSet.applyTo(contentTestLayout)
-
-        moveLayout.alpha = 1F
-        moveLayout.isEnabled = true
-        moveUpBtn.alpha = 1F
-        moveUpBtn.isEnabled = true
-        moveDoneBtn.alpha = 1F
-        moveDoneBtn.isEnabled = true
-        moveDownBtn.alpha = 1F
-        moveDownBtn.isEnabled = true
-
-        val animation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade)
-
-        moveUpBtn.startAnimation(animation)
-        moveDoneBtn.startAnimation(animation)
-        moveDownBtn.startAnimation(animation)
-        moveLayout.startAnimation(animation)
-
-        return true
-    }
 
     /// WEEK INTERACTION
 
@@ -404,7 +301,7 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         deleteCurrentWeek()
     }
 
-    fun deleteCurrentWeek(): Boolean {
+    private fun deleteCurrentWeek(): Boolean {
         if (DataService.weekArray.size == 1) {
             Toast.makeText(this, "Must be at least one week!", Toast.LENGTH_SHORT).show()
             return false
@@ -433,7 +330,6 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         this.currentWeekPosition = position
         this.weekListAdapter.notifyDataSetChanged()
         reloadData()
-        Toast.makeText(this, "Week clicked!", Toast.LENGTH_SHORT).show()
     }
 
     fun addWeekBtnClicked(view: View) {
@@ -441,19 +337,202 @@ class MainActivity : AppCompatActivity(), OnEventClickListener, CurrentEventChan
         this.weekListAdapter.notifyDataSetChanged()
     }
 
-    override fun currentEventChanged(dayPosition: Int) {
-        try {
-            // Safe call is here because it can be not initialized yet
-            if(this.weekAdapter != null)
-                this.weekAdapter?.notifyItemChanged(dayPosition)
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
-        }
-
-    }
-
     companion object {
         const val WEEK_NAME = "Week name"
     }
 
+    /**
+     * A [FragmentPagerAdapter] that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    inner class WeekPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+
+        override fun getItem(position: Int): Fragment {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a WeekItemFragment (defined as a static inner class below).
+
+            return WeekItemFragment.newInstance(position + 1, this@MainActivity.week.getDay(position))
+        }
+
+        override fun getCount(): Int {
+            // Show 3 total pages.
+            return 7
+        }
+
+        /*
+        * This method is overrided in order to have all fragments be updated after changing current week.
+         */
+        override fun getItemPosition(`object`: Any): Int {
+            return PagerAdapter.POSITION_NONE
+        }
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    class WeekItemFragment : Fragment(), OnEventClickListener, OnEventLongClickListener{
+
+        lateinit var day: Day
+        var adapter: DayListAdapter? = null
+
+        override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val weekItem = inflater.inflate(R.layout.week_item_fragment_content, container, false)
+            val dayName = weekItem?.findViewById<TextView>(R.id.day_name)
+            val dayListView = weekItem?.findViewById<ListView>(R.id.eventListView)
+            val eventAddBtn = weekItem?.findViewById<Button>(R.id.addEventBtn)
+
+            dayName?.text = "${day.title}, ${day.todaysDate} ${day.month}"
+
+            if(day.isToday)
+                weekItem.dayLayout.setBackgroundResource(R.drawable.week_item_today_look)
+            else
+                weekItem.dayLayout.setBackgroundResource(R.drawable.week_item_look)
+
+            this.adapter = DayListAdapter(context!!, day, this)
+            dayListView?.adapter = this.adapter
+            dayListView?.setOnItemLongClickListener { parent, view, position, id ->
+                this.onEventLongClicked(parent as @kotlin.ParameterName(name = "parent") AdapterView<DayListAdapter>, view, position, id)}
+
+            eventAddBtn?.setOnClickListener{
+                val newEvent = Event("Event ${day.eventCount()}")
+                if (day.addNewEvent(newEvent)) {
+                    (dayListView?.adapter as DayListAdapter).notifyDataSetChanged()
+                    Toast.makeText(context, "Event added", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Can't add event!", Toast.LENGTH_SHORT).show()
+                }
+            }
+            return weekItem
+        }
+
+        fun updateCurrentEvent() {
+            if(this.day.isToday)
+                this.adapter?.notifyDataSetChanged()
+        }
+
+        override fun onEventClicked(event: Event, adapter: DayListAdapter, position: Int) {
+            var topTimeBorder: Int = 0
+            var bottomTimeBorder: Int = Time.MINUTES_IN_DAY
+
+            // There is the only event in day
+            if (position == 0 && adapter.count == 1) {
+                topTimeBorder = 0
+                bottomTimeBorder = Time.MINUTES_IN_DAY
+            }
+            // This event is first, but there is other events
+            else if (position == 0 && adapter.count > 1) {
+                val belowEvent = adapter.getItem(position + 1) as Event
+                topTimeBorder = 0
+                bottomTimeBorder = belowEvent.startTime.toMinutes()
+            }
+            // There are many events and this event is somewhere in the middle of list
+            else if (position != 0 && position < adapter.count - 1) {
+                val aboveEvent = adapter.getItem(position - 1) as Event
+                val belowEvent = adapter.getItem(position + 1) as Event
+                topTimeBorder = aboveEvent.endTime.toMinutes()
+                bottomTimeBorder = belowEvent.startTime.toMinutes()
+            }
+            // There are many events and this event is the last one
+            else if (position == adapter.count - 1) {
+                val aboveEvent = adapter.getItem(position - 1) as Event
+                topTimeBorder = aboveEvent.endTime.toMinutes()
+                bottomTimeBorder = Time.MINUTES_IN_DAY
+            }
+
+            val eventIntent = Intent(context, EventActivity::class.java)
+            val eventJson = JsonHelper.eventToJson(event)
+
+            eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
+            eventIntent.putExtra(EXTRA_TOP_TIME_BORDER, topTimeBorder)
+            eventIntent.putExtra(EXTRA_BOTTOM_TIME_BORDER, bottomTimeBorder)
+            eventIntent.putExtra(EXTRA_EVENT_POSITION, position)
+            startActivityForResult(eventIntent, RC_EVENT_ACTIVITY)
+        }
+
+        override fun onEventLongClicked(parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long): Boolean {
+            this.adapter = parent.adapter
+            this.adapter?.pickedEventPosition = position
+
+            if (parent.adapter.getSelectedViewsCount() > 0)
+                parent.adapter.removeAllSelectedViews()
+
+            parent.adapter.addSelectedView(position)
+            parent.adapter.notifyDataSetChanged()
+            val newConstraintSet = ConstraintSet()
+            newConstraintSet.clone((context as MainActivity).contentTestLayout)
+            newConstraintSet.connect(R.id.weekViewPager, ConstraintSet.BOTTOM, R.id.moveLayout, ConstraintSet.TOP)
+            newConstraintSet.applyTo((context as MainActivity).contentTestLayout)
+
+            (context as MainActivity).moveLayout.alpha = 1F
+            (context as MainActivity).moveLayout.isEnabled = true
+            (context as MainActivity).moveUpBtn.alpha = 1F
+            (context as MainActivity).moveUpBtn.isEnabled = true
+            (context as MainActivity).moveDoneBtn.alpha = 1F
+            (context as MainActivity).moveDoneBtn.isEnabled = true
+            (context as MainActivity).moveDownBtn.alpha = 1F
+            (context as MainActivity).moveDownBtn.isEnabled = true
+
+            val animation = AnimationUtils.loadAnimation(context, R.anim.fade)
+
+            (context as MainActivity).moveUpBtn.startAnimation(animation)
+            (context as MainActivity).moveDoneBtn.startAnimation(animation)
+            (context as MainActivity).moveDownBtn.startAnimation(animation)
+            (context as MainActivity).moveLayout.startAnimation(animation)
+
+            return true
+        }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+            if (resultCode == Activity.RESULT_CANCELED)
+                return
+
+            when (requestCode) {
+                RC_EVENT_ACTIVITY -> {
+                    if (data?.getStringExtra(EXTRA_ACTION) == ACTION_SAVE) {
+                        // Receive changed event
+                        val changedEventJsonString = data?.getStringExtra(EXTRA_EVENT_JSON)
+                        val changedEventJson = JSONObject(changedEventJsonString)
+                        val changedEvent = JsonHelper.eventFromJson(changedEventJson)
+                        val changedEventPosition = data?.getIntExtra(EXTRA_EVENT_POSITION, 0)
+                        // Change picked event data with received data
+                        this.day.getEvent(changedEventPosition).copy(changedEvent)
+                        this.adapter?.notifyDataSetChanged()
+                    }
+
+                    if (data?.getStringExtra(EXTRA_ACTION) == ACTION_DELETE) {
+                        val changedEventPosition = data?.getIntExtra(EXTRA_EVENT_POSITION, 0)
+                        synchronized(this.day) {
+                            day.deleteEvent(changedEventPosition)
+                        }
+                        this.adapter?.notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        companion object {
+            /**
+             * The fragment argument representing the section number for this
+             * fragment.
+             */
+            private const val ARG_SECTION_NUMBER = "section_number"
+
+            /**
+             * Returns a new instance of this fragment for the given section
+             * number.
+             */
+            fun newInstance(sectionNumber: Int, day: Day): WeekItemFragment {
+                val fragment = WeekItemFragment()
+                fragment.day = day
+                val args = Bundle()
+                args.putInt(ARG_SECTION_NUMBER, sectionNumber)
+                fragment.arguments = args
+                return fragment
+            }
+        }
+    }
 }

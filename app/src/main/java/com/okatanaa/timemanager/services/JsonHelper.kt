@@ -84,7 +84,8 @@ class JsonHelper {
             val startTime = arrayListOf(startTimeJsonArray[0] as Int, startTimeJsonArray[1] as Int)
             val endTimeJsonArray = json.getJSONArray(JSON_EVENT_END_TIME)
             val endTime = arrayListOf(endTimeJsonArray[0] as Int, endTimeJsonArray[1] as Int)
-            return Event(eventName, eventDescription, startTime, endTime, Day(title = eventInDay))
+            val eventColor = json.getInt(JSON_COLOR)
+            return Event(eventName, eventDescription, startTime, endTime, Day(title = eventInDay), eventColor)
         }
 
         fun weekToJson(week: Week): JSONObject {
@@ -127,6 +128,8 @@ class JsonHelper {
             jsonArrayEndTime.put(event.endTimeArr[0])
             jsonArrayEndTime.put(event.endTimeArr[1])
             json.put(JSON_EVENT_END_TIME, jsonArrayEndTime)
+
+            json.put(JSON_COLOR, event.color)
 
             return json
         }
