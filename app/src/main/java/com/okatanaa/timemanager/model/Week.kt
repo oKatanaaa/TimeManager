@@ -52,4 +52,6 @@ class Week {
     fun count() : Int{
         return this.days.count()
     }
+
+    fun getDayList() = this.days
 }

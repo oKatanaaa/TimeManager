@@ -2,8 +2,8 @@ package com.okatanaa.timemanager.interfaces
 
 import android.view.View
 import android.widget.AdapterView
-import com.okatanaa.timemanager.adapter.DayListAdapter
+import com.okatanaa.timemanager.adapter.EventListAdapter
 
 interface OnEventLongClickListener {
-    fun onEventLongClicked(parent: AdapterView<DayListAdapter>, view: View, position: Int, id: Long): Boolean
+    fun onEventLongClicked(parent: AdapterView<EventListAdapter>, view: View, position: Int, id: Long): Boolean
 }

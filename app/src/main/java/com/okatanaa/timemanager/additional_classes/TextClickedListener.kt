@@ -14,11 +14,11 @@ import com.okatanaa.timemanager.utilities.RC_TEXT_EDITOR_ACTIVITY
 import java.lang.Exception
 
 
-/*
+/**
 * This is a helper class, that starts TextEditorActivity in order to edit text.
 * It does not implement OnClickListener interface, because the string that you
-* need to change can be change during the time the application is running;
-* in case you instantiate it the object would receive the only unmutable
+* need to change can be changed during the time the application is running;
+* in case you instantiate it, the object would receive the only unmutable
 * string; this problem cause by that variables in Java contain the links,
 * not values. So if you want to use it, you need to call the onClick function.
 *

@@ -1,11 +1,12 @@
-package com.okatanaa.timemanager.model
+package com.okatanaa.timemanager.utils
 
 import java.util.Calendar
-import android.os.Build
 import android.os.Handler
-import android.support.annotation.RequiresApi
 import com.okatanaa.timemanager.additional_classes.LocalDate
-import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
+import com.okatanaa.timemanager.model.Day
+import com.okatanaa.timemanager.model.Event
+import com.okatanaa.timemanager.model.Time
+import com.okatanaa.timemanager.model.Week
 import java.util.*
 import kotlin.IllegalArgumentException
 
@@ -21,7 +22,7 @@ class CalendarSynchronizer(val week: Week, val handler: Handler) {
     var todaysDate = 0
 
     lateinit var synchronizedDay: Day
-    lateinit var thread: CalendarSynchronizer.DaySyncronizer
+    lateinit var thread: DaySyncronizer
 
     init {
         setData()
@@ -41,14 +42,14 @@ class CalendarSynchronizer(val week: Week, val handler: Handler) {
         this.week.getDayByName(this.currentWeekDay).todaysDate = this.todaysDate
     }
 
-    fun setData() {
+    private fun setData() {
         setCurrentWeekDay()
         setCurrentMonth()
         this.todaysDate = this.calendar.get(Calendar.DAY_OF_MONTH)
         this.synchronizedDay = this.week.getDay(this.currentWeekDayNum)
     }
 
-    fun startSynchronizingThread() {
+    private fun startSynchronizingThread() {
         this.thread = DaySyncronizer(this.handler)
         this.thread.isDaemon = true
         this.thread.start()

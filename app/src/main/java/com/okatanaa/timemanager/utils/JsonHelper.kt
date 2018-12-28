@@ -1,10 +1,11 @@
-package com.okatanaa.timemanager.services
+package com.okatanaa.timemanager.utils
 
 import android.content.Context
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.model.Week
+import com.okatanaa.timemanager.services.Settings
 import com.okatanaa.timemanager.utilities.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -31,13 +32,12 @@ class JsonHelper {
 
             // Read data
             val size = input?.available()
-            val buffer: ByteArray = ByteArray(size!!)
+            val buffer = ByteArray(size!!)
             input?.read(buffer)
             input?.close()
             jsonString = String(buffer)
 
-            val json = JSONObject(jsonString)
-            return json
+            return JSONObject(jsonString)
         }
 
 

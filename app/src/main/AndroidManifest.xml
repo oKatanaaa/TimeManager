@@ -9,7 +9,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".controller.MainActivity">
+        <activity android:name=".activity.presenter.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -28,10 +28,10 @@
         <activity
                 android:name=".controller.SettingsActivity"
                 android:label="@string/title_activity_settings"
-                android:parentActivityName=".controller.MainActivity">
+                android:parentActivityName=".activity.presenter.MainActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.okatanaa.timemanager.controller.MainActivity"/>
+                    android:value="com.okatanaa.timemanager.activity.presenter.MainActivity"/>
         </activity>
     </application>
 

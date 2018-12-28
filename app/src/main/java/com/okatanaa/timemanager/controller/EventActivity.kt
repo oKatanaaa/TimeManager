@@ -15,12 +15,11 @@ import android.widget.*
 import com.okatanaa.timemanager.additional_classes.TextClickedListener
 import com.okatanaa.timemanager.controller.fragments.TimePickerFragment
 import com.okatanaa.timemanager.model.Time
-import com.okatanaa.timemanager.services.JsonHelper
+import com.okatanaa.timemanager.utils.JsonHelper
 import com.okatanaa.timemanager.utilities.*
 import kotlinx.android.synthetic.main.content_event.*
 import org.json.JSONObject
 import kotlin.IllegalArgumentException
-import kotlin.math.round
 
 
 class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener,
