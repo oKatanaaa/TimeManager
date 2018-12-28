@@ -1,3 +1,4 @@
+### Readme is out of date
 # TimeManager
 
 TimeManager is an android application that helps you to organize your time.
