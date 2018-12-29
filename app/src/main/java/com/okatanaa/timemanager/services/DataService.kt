@@ -5,10 +5,10 @@ import android.os.Handler
 import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import com.okatanaa.timemanager.interfaces.GlobalModel
 import com.okatanaa.timemanager.model.Week
-import com.okatanaa.timemanager.utilities.JSON_GLOBAL_START_TIME
-import com.okatanaa.timemanager.utilities.JSON_PRIMARY_DATA_WEEK_FILE
-import com.okatanaa.timemanager.utilities.JSON_SETTINGS
-import com.okatanaa.timemanager.utilities.JSON_WEEKS
+import com.okatanaa.timemanager.utils.JSON_GLOBAL_START_TIME
+import com.okatanaa.timemanager.utils.JSON_PRIMARY_DATA_WEEK_FILE
+import com.okatanaa.timemanager.utils.JSON_SETTINGS
+import com.okatanaa.timemanager.utils.JSON_WEEKS
 import com.okatanaa.timemanager.utils.JsonHelper
 import org.json.JSONArray
 import org.json.JSONObject

@@ -5,7 +5,7 @@ import android.app.TimePickerDialog
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import com.okatanaa.timemanager.model.Time
-import com.okatanaa.timemanager.utilities.BUNDLE_TIME
+import com.okatanaa.timemanager.utils.BUNDLE_TIME
 
 class TimePickerFragment: DialogFragment() {
 

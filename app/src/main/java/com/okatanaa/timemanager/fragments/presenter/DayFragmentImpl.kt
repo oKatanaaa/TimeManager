@@ -16,9 +16,7 @@ import com.okatanaa.timemanager.fragments.presenter.event_ui_interaction.OnEvent
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Time
-import com.okatanaa.timemanager.model.Week
-import com.okatanaa.timemanager.utils.JsonHelper
-import com.okatanaa.timemanager.utilities.*
+import com.okatanaa.timemanager.utils.*
 import org.json.JSONObject
 
 class DayFragmentImpl : Fragment(), DayFragment {

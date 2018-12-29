@@ -1,6 +1,5 @@
 package com.okatanaa.timemanager.activity.presenter
 
-import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -8,7 +7,6 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.AdapterView
 import com.okatanaa.timemanager.R
 import com.okatanaa.timemanager.activity.adapters.ViewPagerAdapter
 import com.okatanaa.timemanager.activity.adapters.WeekListAdapter
@@ -18,12 +16,11 @@ import com.okatanaa.timemanager.activity.views.WeekViewImpl
 import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import com.okatanaa.timemanager.interfaces.GlobalModel
 import com.okatanaa.timemanager.activity.presenter.week_ui_interaction.OnWeekUIClickListenerImpl
-import com.okatanaa.timemanager.additional_classes.TextClickedListener
+import com.okatanaa.timemanager.utils.TextClickedListener
 import com.okatanaa.timemanager.controller.SettingsActivity
-import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.DataService
-import com.okatanaa.timemanager.utilities.EXTRA_EDITED_VALUE
-import com.okatanaa.timemanager.utilities.RC_TEXT_EDITOR_ACTIVITY
+import com.okatanaa.timemanager.utils.EXTRA_EDITED_VALUE
+import com.okatanaa.timemanager.utils.RC_TEXT_EDITOR_ACTIVITY
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), CurrentEventChangedListener, OnWeekUIClickListener.OnWeekSelectedListener {

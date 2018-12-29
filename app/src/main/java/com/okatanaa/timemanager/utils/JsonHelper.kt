@@ -6,7 +6,6 @@ import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.model.Week
 import com.okatanaa.timemanager.services.Settings
-import com.okatanaa.timemanager.utilities.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException

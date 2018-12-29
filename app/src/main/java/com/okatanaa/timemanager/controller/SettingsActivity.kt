@@ -1,19 +1,15 @@
 package com.okatanaa.timemanager.controller
 
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.TimePicker
-import android.widget.Toast
 import com.okatanaa.timemanager.R
-import com.okatanaa.timemanager.additional_classes.TextClickedListener
 import com.okatanaa.timemanager.controller.fragments.TimePickerFragment
 import com.okatanaa.timemanager.model.Time
 import com.okatanaa.timemanager.services.Settings
-import com.okatanaa.timemanager.utilities.BUNDLE_TIME
-import com.okatanaa.timemanager.utilities.EXTRA_EDITED_VALUE
+import com.okatanaa.timemanager.utils.BUNDLE_TIME
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener {

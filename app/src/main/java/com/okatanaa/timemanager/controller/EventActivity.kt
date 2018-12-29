@@ -12,11 +12,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import com.okatanaa.timemanager.additional_classes.TextClickedListener
 import com.okatanaa.timemanager.controller.fragments.TimePickerFragment
 import com.okatanaa.timemanager.model.Time
-import com.okatanaa.timemanager.utils.JsonHelper
-import com.okatanaa.timemanager.utilities.*
+import com.okatanaa.timemanager.utils.*
 import kotlinx.android.synthetic.main.content_event.*
 import org.json.JSONObject
 import kotlin.IllegalArgumentException
@@ -74,10 +72,10 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener,
 
     fun setTextViews() {
         eventNameTxt.text = event.name
-        eventNameTxt.setOnClickListener{TextClickedListener.onClick(this, EVENT_NAME, eventNameTxt.text.toString())}
+        eventNameTxt.setOnClickListener{ TextClickedListener.onClick(this, EVENT_NAME, eventNameTxt.text.toString())}
 
         eventDescriptionTxt.text = event.description
-        eventDescriptionTxt.setOnClickListener{TextClickedListener.onClick(this, DESCRIPTION, eventDescriptionTxt.text.toString())}
+        eventDescriptionTxt.setOnClickListener{ TextClickedListener.onClick(this, DESCRIPTION, eventDescriptionTxt.text.toString())}
         inWhatDayTxt.text = event?.inDay.toString()
 
         startTimeDynamicTxt.text = this.event.startTime.toString()

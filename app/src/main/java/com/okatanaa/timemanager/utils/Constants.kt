@@ -1,4 +1,4 @@
-package com.okatanaa.timemanager.utilities
+package com.okatanaa.timemanager.utils
 
 import com.okatanaa.timemanager.R
 import org.json.JSONObject

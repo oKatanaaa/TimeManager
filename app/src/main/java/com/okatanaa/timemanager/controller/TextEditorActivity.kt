@@ -8,8 +8,8 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import com.okatanaa.timemanager.R
-import com.okatanaa.timemanager.utilities.EXTRA_EDITED_NAME
-import com.okatanaa.timemanager.utilities.EXTRA_EDITED_VALUE
+import com.okatanaa.timemanager.utils.EXTRA_EDITED_NAME
+import com.okatanaa.timemanager.utils.EXTRA_EDITED_VALUE
 
 class TextEditorActivity : AppCompatActivity() {
 

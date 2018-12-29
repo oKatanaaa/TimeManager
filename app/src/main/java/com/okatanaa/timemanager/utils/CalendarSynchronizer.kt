@@ -2,7 +2,6 @@ package com.okatanaa.timemanager.utils
 
 import java.util.Calendar
 import android.os.Handler
-import com.okatanaa.timemanager.additional_classes.LocalDate
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Time
