@@ -8,7 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import com.okatanaa.timemanager.adapter.EventListAdapter
+import com.okatanaa.timemanager.fragments.adapter.EventListAdapter
 import com.okatanaa.timemanager.controller.EventActivity
 import com.okatanaa.timemanager.fragments.views.DayFragmentView
 import com.okatanaa.timemanager.fragments.views.DayFragmentViewImpl
@@ -23,30 +23,25 @@ class DayFragmentImpl : Fragment(), DayFragment {
 
     private lateinit var dayFragmentView: DayFragmentView
     private lateinit var day: Day
-    private lateinit var eventList: ListView
+    private lateinit var eventListView: ListView
     private lateinit var eventListAdapter: EventListAdapter
-    private lateinit var aEventList: ArrayList<Event>
     private var isToday = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         this.dayFragmentView = DayFragmentViewImpl(context!!, container)
         //this.dayFragmentView.setDayName("${day.title}, ${day.todaysDate} ${day.month}")
         this.dayFragmentView.setDayName("${day.title}, ${day.todaysDate} Month")
+        this.dayFragmentView.bindEventList(this.day.getEventList())
         this.dayFragmentView.setOnEventUIClickListener(OnEventUIClickListenerImpl(this.dayFragmentView, this.day))
 
         if(day.isToday)
             this.dayFragmentView.setDayCurrent()
 
-        this.eventList = this.dayFragmentView.getEventList()
-        this.eventList.setOnItemClickListener { _, _, position, _ -> onEventClicked(position) }
-        this.eventListAdapter = this.eventList.adapter as EventListAdapter
+        this.eventListView = this.dayFragmentView.getEventListView()
+        this.eventListView.setOnItemClickListener { _, _, position, _ -> onEventClicked(position) }
+        this.eventListAdapter = this.eventListView.adapter as EventListAdapter
 
         return this.dayFragmentView.getRootView()
-    }
-
-    override fun bindEventList(eventList: ArrayList<Event>) {
-        this.aEventList = eventList
-        this.dayFragmentView.bindEventList(eventList)
     }
 
     override fun setCurrentDay() {

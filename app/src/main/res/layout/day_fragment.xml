@@ -3,8 +3,8 @@
                                              xmlns:app="http://schemas.android.com/apk/res-auto"
                                              xmlns:tools="http://schemas.android.com/tools"
                                              android:layout_width="match_parent"
-                                             android:layout_height="match_parent">
-
+                                             android:layout_height="match_parent"
+                                             android:id="@+id/fragmentLayout">
     <android.support.constraint.ConstraintLayout
             android:background="@drawable/week_item_look"
             android:layout_width="0dp"
@@ -52,7 +52,7 @@
                 android:text="@string/add_event"
                 android:textColor="#5b5b5b"
                 android:layout_width="0dp"
-                android:layout_height="37dp"
+                android:layout_height="48dp"
                 android:id="@+id/addEventBtn"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -62,9 +62,7 @@
                 android:layout_marginEnd="5dp"
                 android:fontFamily="sans-serif"
                 android:textAllCaps="false"/>
-
     </android.support.constraint.ConstraintLayout>
-
     <android.support.constraint.ConstraintLayout
             android:id="@+id/moveLayout"
             android:layout_width="match_parent"
@@ -73,7 +71,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:background="#7b262626">
-
         <Button
                 android:layout_width="70dp"
                 android:layout_height="45dp"
@@ -137,7 +134,4 @@
                 android:orientation="vertical"
                 app:layout_constraintGuide_percent="0.5"/>
     </android.support.constraint.ConstraintLayout>
-
-
-
 </android.support.constraint.ConstraintLayout>

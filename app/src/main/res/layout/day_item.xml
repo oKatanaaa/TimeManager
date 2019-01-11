@@ -61,7 +61,7 @@
                 app:layout_constraintBottom_toBottomOf="parent" android:layout_marginRight="8dp"/>
         <ImageView
                 android:layout_width="10dp"
-                android:layout_height="10dp" app:srcCompat="@drawable/color_circle"
+                android:layout_height="10dp"
                 android:id="@+id/eventColor"
                 app:layout_constraintEnd_toStartOf="@+id/startTimeLbl" android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp" android:layout_marginTop="1dp"

@@ -4,13 +4,15 @@ import android.content.Context
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
+import android.support.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
 import com.okatanaa.timemanager.R
-import com.okatanaa.timemanager.adapter.EventListAdapter
+import com.okatanaa.timemanager.R.id.contentTestLayout
+import com.okatanaa.timemanager.fragments.adapter.EventListAdapter
 import com.okatanaa.timemanager.fragments.presenter.event_ui_interaction.OnEventUIClickListener
 import com.okatanaa.timemanager.model.Event
 import kotlinx.android.synthetic.main.content_main.view.*
@@ -30,10 +32,11 @@ class DayFragmentViewImpl: DayFragmentView {
     private val doneEventBtn: Button
     private val addEventBtn: Button
     private val moveLayout: ConstraintLayout
+    private val fragmentLayout: ConstraintLayout
 
     constructor(context: Context, container: ViewGroup?) {
         this.context = context
-        this.rootView = LayoutInflater.from(context).inflate(R.layout.day_fragment, container)
+        this.rootView = LayoutInflater.from(context).inflate(R.layout.day_fragment, container, false)
         this.dayName = this.rootView.findViewById(R.id.dayName)
         this.eventListView = this.rootView.findViewById(R.id.eventListView)
         this.eventListAdapter = EventListAdapter(context)
@@ -45,6 +48,7 @@ class DayFragmentViewImpl: DayFragmentView {
         this.doneEventBtn = this.rootView.findViewById(R.id.doneEventBtn)
         this.addEventBtn = this.rootView.findViewById(R.id.addEventBtn)
         this.moveLayout = this.rootView.moveLayout
+        this.fragmentLayout = this.rootView.fragmentLayout
         hideEventInteractionUI()
     }
 
@@ -64,7 +68,7 @@ class DayFragmentViewImpl: DayFragmentView {
         this.dayLayout.setBackgroundResource(R.drawable.week_item_look)
     }
 
-    override fun getEventList(): ListView {
+    override fun getEventListView(): ListView {
         return this.eventListView
     }
 
@@ -86,13 +90,11 @@ class DayFragmentViewImpl: DayFragmentView {
         this.doneEventBtn.isEnabled = false
         this.moveEventDownBtn.alpha = 0F
         this.moveEventDownBtn.isEnabled = false
+        disconnectMoveLayoutToDayLayout()
     }
 
     override fun showEventInteractionUI() {
-        val newConstraintSet = ConstraintSet()
-        newConstraintSet.clone(this.rootView.contentTestLayout)
-        newConstraintSet.connect(R.id.weekViewPager, ConstraintSet.BOTTOM, R.id.moveLayout, ConstraintSet.TOP)
-        newConstraintSet.applyTo(this.rootView.contentTestLayout)
+        connectMoveLayoutToDayLayout()
 
         moveLayout.alpha = 1F
         moveLayout.isEnabled = true
@@ -118,6 +120,25 @@ class DayFragmentViewImpl: DayFragmentView {
         this.moveEventDownBtn.setOnClickListener { listener.onMoveEventDownBtnClicked() }
         this.deleteEventBtn.setOnClickListener { listener.onDeleteEventBtnClicked() }
         this.doneEventBtn.setOnClickListener { listener.onDoneEventBtnClicked() }
+        this.addEventBtn.setOnClickListener { listener.onAddEventBtnClicked(this.eventListAdapter) }
         this.eventListView.setOnItemLongClickListener { parent, _, position, _ -> listener.onEventSelected(parent as AdapterView<EventListAdapter>, position) }
+    }
+
+    private fun connectMoveLayoutToDayLayout() {
+        val newConstraintSet = ConstraintSet()
+        newConstraintSet.clone(this.fragmentLayout)
+        newConstraintSet.clear(R.id.dayLayout, ConstraintSet.BOTTOM)
+        newConstraintSet.connect(R.id.dayLayout, ConstraintSet.BOTTOM, R.id.moveLayout, ConstraintSet.TOP, 10)
+        TransitionManager.beginDelayedTransition(this.dayLayout)
+        newConstraintSet.applyTo(this.fragmentLayout)
+    }
+
+    private fun disconnectMoveLayoutToDayLayout() {
+        val newConstraintSet = ConstraintSet()
+        newConstraintSet.clone(this.fragmentLayout)
+        newConstraintSet.clear(R.id.dayLayout, ConstraintSet.BOTTOM)
+        newConstraintSet.connect(R.id.dayLayout, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM, 10)
+        TransitionManager.beginDelayedTransition(this.dayLayout)
+        newConstraintSet.applyTo(this.fragmentLayout)
     }
 }

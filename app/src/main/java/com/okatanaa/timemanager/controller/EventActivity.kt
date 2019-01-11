@@ -123,7 +123,7 @@ class EventActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListener,
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         when(position) {
             0 -> {
-                colorSpinner.setBackgroundResource(R.drawable.color_circle)
+                colorSpinner.setBackgroundResource(R.drawable.color_circle_null)
                 this.event.color = Event.NONE
             }
             1 -> {

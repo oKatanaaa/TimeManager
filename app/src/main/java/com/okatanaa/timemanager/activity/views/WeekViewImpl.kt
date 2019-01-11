@@ -95,6 +95,7 @@ class WeekViewImpl: MainView {
 
     override fun bindWeekList(weekList: ArrayList<String>) {
         this.weekListAdapter.bindWeekList(weekList)
+        this.weekListAdapter.notifyDataSetChanged()
     }
 
     override fun setOnWeekUIClickListener(listener: OnWeekUIClickListener) {
@@ -108,6 +109,7 @@ class WeekViewImpl: MainView {
 
     override fun bindDayList(dayList: ArrayList<Day>) {
         this.viewPagerAdapter.bindDayList(dayList)
+        this.viewPagerAdapter.notifyDataSetChanged()
     }
 
 

@@ -1,4 +1,4 @@
-package com.okatanaa.timemanager.adapter
+package com.okatanaa.timemanager.fragments.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,8 +8,6 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.okatanaa.timemanager.R
-import com.okatanaa.timemanager.interfaces.OnEventClickListener
-import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import kotlinx.android.synthetic.main.day_item.view.*
 

@@ -39,16 +39,18 @@ class MainActivity : AppCompatActivity(), CurrentEventChangedListener, OnWeekUIC
         super.onCreate(savedInstanceState)
         this.mainView = WeekViewImpl(this, null)
         setContentView(this.mainView.getRootView())
-
         this.viewPager = this.mainView.getViewPager()
-
 
         this.globalModel = DataService
         this.globalModel.initialize(this)
         //this.globalModel.startTimeSynchronizing(this)
         this.mainView.setOnWeekUIClickListener(OnWeekUIClickListenerImpl(
             this.globalModel, this.mainView, this))
+
+        // Bind week list that we can see on the left when swipe to the right
         this.mainView.bindWeekList(this.globalModel.getWeekNameList())
+        // Bind general week data we're gonna use: days, events and etc.
+        this.mainView.bindDayList(this.globalModel.getWeek(0).getDayList())
     }
 
     override fun onBackPressed() {

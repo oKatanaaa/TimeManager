@@ -1,6 +1,6 @@
 package com.okatanaa.timemanager.interfaces
 
-import com.okatanaa.timemanager.adapter.EventListAdapter
+import com.okatanaa.timemanager.fragments.adapter.EventListAdapter
 import com.okatanaa.timemanager.model.Event
 
 interface OnEventClickListener {

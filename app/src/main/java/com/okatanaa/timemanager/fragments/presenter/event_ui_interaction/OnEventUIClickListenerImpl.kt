@@ -1,9 +1,10 @@
 package com.okatanaa.timemanager.fragments.presenter.event_ui_interaction
 
 import android.content.Context
+import android.util.Log
 import android.widget.AdapterView
 import android.widget.Toast
-import com.okatanaa.timemanager.adapter.EventListAdapter
+import com.okatanaa.timemanager.fragments.adapter.EventListAdapter
 import com.okatanaa.timemanager.fragments.views.DayFragmentView
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
@@ -73,13 +74,14 @@ class OnEventUIClickListenerImpl: OnEventUIClickListener {
 
     override fun onDoneEventBtnClicked() {
         this.adapter.removeAllSelectedViews()
+        this.adapter.notifyDataSetChanged()
         this.dayFragmentView.hideEventInteractionUI()
     }
 
-    override fun onAddEventBtnClicked() {
+    override fun onAddEventBtnClicked(adapter: EventListAdapter) {
         val newEvent = Event("Event ${day.eventCount()}")
         if (this.day.addNewEvent(newEvent)) {
-            this.adapter.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
             this.dayFragmentView.showToast("Event added", Toast.LENGTH_SHORT)
         } else
             this.dayFragmentView.showToast("Can't add event!", Toast.LENGTH_SHORT)

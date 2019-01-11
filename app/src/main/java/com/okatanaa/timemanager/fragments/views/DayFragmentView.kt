@@ -8,7 +8,7 @@ import com.okatanaa.timemanager.viewmvp.ViewMvp
 interface DayFragmentView: ViewMvp {
     fun setDayName(name: String)
     fun setDayCurrent()
-    fun getEventList(): ListView
+    fun getEventListView(): ListView
     fun bindEventList(eventList: ArrayList<Event>)
     fun hideEventInteractionUI()
     fun showEventInteractionUI()

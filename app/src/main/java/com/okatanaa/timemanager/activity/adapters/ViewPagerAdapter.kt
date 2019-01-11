@@ -23,7 +23,6 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
     fun bindDayList(dayList: ArrayList<Day>) {
         this.dayList = dayList
-        this.notifyDataSetChanged()
     }
 
     override fun getItem(position: Int): Fragment {

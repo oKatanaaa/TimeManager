@@ -88,6 +88,10 @@ class Day {
         return position
     }
 
+    @Synchronized fun getEventList(): ArrayList<Event> {
+        return this.events
+    }
+
     @Synchronized fun eventCount(): Int {
         return events.count()
     }
