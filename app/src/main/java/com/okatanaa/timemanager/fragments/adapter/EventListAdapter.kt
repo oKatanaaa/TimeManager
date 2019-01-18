@@ -87,12 +87,11 @@ class EventListAdapter(val context: Context) : BaseAdapter() {
      */
     fun addSelectedView(position: Int) {
         this.selectedViews.add(position)
-        println(this.selectedViews)
     }
 
     /*
     * The adapter contains a list of selected views in order to draw them correctly.
-    * This functions deletes selection of a view at the particular position.
+    * This functions deletes selection of a view at a particular position.
      */
     fun removeSelectedView(position: Int) {
         if(!this.selectedViews.contains(position))

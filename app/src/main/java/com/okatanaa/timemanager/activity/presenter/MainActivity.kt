@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity(), CurrentEventChangedListener, OnWeekUIC
 
     /*
     * This field is used when we choose option 'Rename week'
-    * in OptionsMenu. Look at function onOptionsItemSelected
+    * in OptionsMenu. Look at the function onOptionsItemSelected
      */
     private var selectedWeekPosition = 0
 
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), CurrentEventChangedListener, OnWeekUIC
 
         this.globalModel = DataService
         this.globalModel.initialize(this)
-        //this.globalModel.startTimeSynchronizing(this)
+        this.globalModel.startTimeSynchronizing(this)
         this.mainView.setOnWeekUIClickListener(OnWeekUIClickListenerImpl(
             this.globalModel, this.mainView, this))
 
@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity(), CurrentEventChangedListener, OnWeekUIC
         this.mainView.bindWeekList(this.globalModel.getWeekNameList())
         // Bind general week data we're gonna use: days, events and etc.
         this.mainView.bindDayList(this.globalModel.getWeek(0).getDayList())
+        this.viewPager.setCurrentItem(4, false)
     }
 
     override fun onBackPressed() {
@@ -113,7 +114,7 @@ class MainActivity : AppCompatActivity(), CurrentEventChangedListener, OnWeekUIC
 
     override fun currentEventChanged(dayPosition: Int) {
         (this.viewPager.adapter as ViewPagerAdapter)
-            .getCurrentFragment().currentEventChanged()
+            .getCurrentFragment()?.currentEventChanged()
     }
 
     override fun onWeekSelected(weekPosition: Int) {

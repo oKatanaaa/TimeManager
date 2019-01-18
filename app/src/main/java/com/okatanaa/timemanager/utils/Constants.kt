@@ -38,5 +38,9 @@ const val RC_EVENT_ACTIVITY = 0
 const val RC_TEXT_EDITOR_ACTIVITY = 1
 
 // BUNDLE STRING KEYS
-
 const val BUNDLE_TIME = "time"
+
+// LOG TAGS
+const val LOG_UI_EVENT_INTERACTION = "UIEventInteraction"
+const val LOG_TIME_SYNCHRONIZER = "TimeSynchronizer"
+const val LOG_FRAGMENT_EVENT = "FragmentEvent"

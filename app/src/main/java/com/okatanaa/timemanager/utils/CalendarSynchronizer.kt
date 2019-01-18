@@ -2,6 +2,7 @@ package com.okatanaa.timemanager.utils
 
 import java.util.Calendar
 import android.os.Handler
+import android.util.Log
 import com.okatanaa.timemanager.model.Day
 import com.okatanaa.timemanager.model.Event
 import com.okatanaa.timemanager.model.Time
@@ -29,16 +30,17 @@ class CalendarSynchronizer(val week: Week, val handler: Handler) {
         startSynchronizingThread()
     }
 
+    /**
+     * This function sets dates and months on days in current week.
+     */
     fun synchronize() {
         var helper = LocalDate.of(2018, this.currentMonthNum, this.todaysDate).minusDays(this.currentWeekDayNum)
-        for(day in this.week.days) {
+        for(i in 0 until 7) {
+            val day = this.week.getDay(i)
             day.todaysDate = helper.dayOfMonth
             day.month = getMonthNameByNumber(helper.monthValue)
             helper = helper.plusDays(1)
         }
-        this.week.getDayByName(this.currentWeekDay).isToday = true
-        this.week.getDayByName(this.currentWeekDay).month = this.currentMonth
-        this.week.getDayByName(this.currentWeekDay).todaysDate = this.todaysDate
     }
 
     private fun setData() {
@@ -46,6 +48,7 @@ class CalendarSynchronizer(val week: Week, val handler: Handler) {
         setCurrentMonth()
         this.todaysDate = this.calendar.get(Calendar.DAY_OF_MONTH)
         this.synchronizedDay = this.week.getDay(this.currentWeekDayNum)
+        this.synchronizedDay.isToday = true
     }
 
     private fun startSynchronizingThread() {
@@ -152,20 +155,21 @@ class CalendarSynchronizer(val week: Week, val handler: Handler) {
                         break
                     }
                 }
+
                 if(newCurrentEvent != null && currentEvent == null) {
-                    println("New!")
+                    Log.i(LOG_TIME_SYNCHRONIZER, "New current event.")
                     currentEvent = newCurrentEvent
                     this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
                 if(newCurrentEvent == null && currentEvent != null) {
-                    println("New!")
+                    Log.i(LOG_TIME_SYNCHRONIZER, "No current event.")
                     currentEvent = newCurrentEvent
                     this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
                 }
 
                 if(newCurrentEvent != null && currentEvent != null && !newCurrentEvent?.equals(currentEvent)) {
-                    println("New!")
+                    Log.i(LOG_TIME_SYNCHRONIZER, "New current event.")
                     currentEvent = newCurrentEvent
                     this.handler.sendEmptyMessage(this@CalendarSynchronizer.currentWeekDayNum)
                 }

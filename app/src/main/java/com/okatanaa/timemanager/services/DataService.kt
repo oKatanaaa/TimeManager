@@ -1,20 +1,19 @@
 package com.okatanaa.timemanager.services
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
+import android.os.Message
 import com.okatanaa.timemanager.interfaces.CurrentEventChangedListener
 import com.okatanaa.timemanager.interfaces.GlobalModel
 import com.okatanaa.timemanager.model.Week
-import com.okatanaa.timemanager.utils.JSON_GLOBAL_START_TIME
-import com.okatanaa.timemanager.utils.JSON_PRIMARY_DATA_WEEK_FILE
-import com.okatanaa.timemanager.utils.JSON_SETTINGS
-import com.okatanaa.timemanager.utils.JSON_WEEKS
-import com.okatanaa.timemanager.utils.JsonHelper
+import com.okatanaa.timemanager.utils.*
 import org.json.JSONArray
 import org.json.JSONObject
 
 object DataService: GlobalModel {
     lateinit var weekList: ArrayList<Week>
+    lateinit var calendarSynchronizer: CalendarSynchronizer
 
     override fun initialize(context: Context) {
         this.weekList = JsonHelper.readWeekArr(JsonHelper.readJSON(context))
@@ -83,8 +82,17 @@ object DataService: GlobalModel {
         return true
     }
 
-    override fun startTimeSynchronizing(onCurrentEventChangedListener: CurrentEventChangedListener): Handler {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun startTimeSynchronizing(currentEventChangedListener: CurrentEventChangedListener): Handler {
+        val handler = @SuppressLint("HandlerLeak")
+        object: Handler() {
+            override fun handleMessage(msg: Message?) {
+                super.handleMessage(msg)
+                currentEventChangedListener.currentEventChanged(msg!!.arg1)
+            }
+        }
+
+        this.calendarSynchronizer = CalendarSynchronizer(this.weekList[0], handler)
+        return handler
     }
 
     override fun saveData(context: Context) {

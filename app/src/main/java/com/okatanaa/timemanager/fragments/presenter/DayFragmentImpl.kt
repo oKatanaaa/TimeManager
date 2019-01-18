@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,40 +22,52 @@ import org.json.JSONObject
 
 class DayFragmentImpl : Fragment(), DayFragment {
 
-    private lateinit var dayFragmentView: DayFragmentView
-    private lateinit var day: Day
+    private var dayFragmentView: DayFragmentView? = null
+    private var day: Day? = null
     private lateinit var eventListView: ListView
     private lateinit var eventListAdapter: EventListAdapter
-    private var isToday = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Log.i(LOG_FRAGMENT_EVENT, "View created")
         this.dayFragmentView = DayFragmentViewImpl(context!!, container)
-        //this.dayFragmentView.setDayName("${day.title}, ${day.todaysDate} ${day.month}")
-        this.dayFragmentView.setDayName("${day.title}, ${day.todaysDate} Month")
-        this.dayFragmentView.bindEventList(this.day.getEventList())
-        this.dayFragmentView.setOnEventUIClickListener(OnEventUIClickListenerImpl(this.dayFragmentView, this.day))
+        if(this.day != null) {
+            Log.i(LOG_FRAGMENT_EVENT, "View is binded with day data")
+            this.dayFragmentView!!.setDayName("${day!!.title}, ${day!!.todaysDate} ${day!!.month}")
+            this.dayFragmentView!!.bindEventList(this.day!!.getEventList())
+            this.dayFragmentView!!.setOnEventUIClickListener(OnEventUIClickListenerImpl(this.dayFragmentView!!, this.day!!))
+        }
 
-        if(day.isToday)
-            this.dayFragmentView.setDayCurrent()
+        if(this.day != null && this.day!!.isToday)
+            this.dayFragmentView!!.setDayCurrent()
 
-        this.eventListView = this.dayFragmentView.getEventListView()
+        this.eventListView = this.dayFragmentView!!.getEventListView()
         this.eventListView.setOnItemClickListener { _, _, position, _ -> onEventClicked(position) }
         this.eventListAdapter = this.eventListView.adapter as EventListAdapter
 
-        return this.dayFragmentView.getRootView()
+        return this.dayFragmentView!!.getRootView()
     }
 
-    override fun setCurrentDay() {
-        this.isToday = true
-        this.dayFragmentView.setDayCurrent()
+    override fun setDay(day: Day) {
+        Log.i(LOG_FRAGMENT_EVENT, "Day is set")
+        this.day = day
+        if(this.dayFragmentView != null) {
+            Log.i(LOG_FRAGMENT_EVENT, "View is binded with day data")
+            this.dayFragmentView!!.setDayName("${day!!.title}, ${day!!.todaysDate} ${day!!.month}")
+            this.dayFragmentView!!.bindEventList(this.day!!.getEventList())
+            this.dayFragmentView!!.setOnEventUIClickListener(OnEventUIClickListenerImpl(this.dayFragmentView!!, this.day!!))
+
+            if(this.day != null && this.day!!.isToday)
+                this.dayFragmentView!!.setDayCurrent()
+        }
     }
 
     override fun currentEventChanged() {
-        if(this.isToday)
+        if(this.day != null && this.day!!.isToday)
             this.eventListAdapter.notifyDataSetChanged()
     }
 
     fun onEventClicked(position: Int) {
+        Log.i(LOG_UI_EVENT_INTERACTION, "Event clicked")
         var topTimeBorder: Int = 0
         var bottomTimeBorder: Int = Time.MINUTES_IN_DAY
 
@@ -84,7 +97,7 @@ class DayFragmentImpl : Fragment(), DayFragment {
         }
 
         val eventIntent = Intent(context, EventActivity::class.java)
-        val eventJson = JsonHelper.eventToJson(this.day.getEvent(position))
+        val eventJson = JsonHelper.eventToJson(this.day!!.getEvent(position))
 
         eventIntent.putExtra(EXTRA_EVENT_JSON, eventJson.toString())
         eventIntent.putExtra(EXTRA_TOP_TIME_BORDER, topTimeBorder)
@@ -107,14 +120,14 @@ class DayFragmentImpl : Fragment(), DayFragment {
                     val changedEvent = JsonHelper.eventFromJson(changedEventJson)
                     val changedEventPosition = data?.getIntExtra(EXTRA_EVENT_POSITION, 0)
                     // Change picked event data with received data
-                    this.day.getEvent(changedEventPosition).copy(changedEvent)
+                    this.day!!.getEvent(changedEventPosition).copy(changedEvent)
                     this.eventListAdapter?.notifyDataSetChanged()
                 }
 
                 if (data?.getStringExtra(EXTRA_ACTION) == ACTION_DELETE) {
                     val changedEventPosition = data?.getIntExtra(EXTRA_EVENT_POSITION, 0)
-                    synchronized(this.day) {
-                        day.deleteEvent(changedEventPosition)
+                    synchronized(this.day!!) {
+                        day!!.deleteEvent(changedEventPosition)
                     }
                     this.eventListAdapter?.notifyDataSetChanged()
                 }
@@ -135,7 +148,7 @@ class DayFragmentImpl : Fragment(), DayFragment {
          */
         fun newInstance(sectionNumber: Int, day: Day): DayFragmentImpl {
             val fragment = DayFragmentImpl()
-            fragment.day = day
+            fragment.setDay(day)
             val args = Bundle()
             args.putInt(ARG_SECTION_NUMBER, sectionNumber)
             fragment.arguments = args
