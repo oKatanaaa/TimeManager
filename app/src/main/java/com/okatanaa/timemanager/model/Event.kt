@@ -93,7 +93,7 @@ class Event {
         return newEvent
     }
 
-    companion object {
+    companion object Color {
         const val RED = 4
         const val GREEN = 3
         const val YELLOW = 1

@@ -9,29 +9,29 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".activity.presenter.MainActivity">
+        <activity android:name="com.okatanaa.timemanager.activity.MainActivity.presenter.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".controller.EventActivity">
+        <activity android:name=".activity.EventActivity.presenter.EventActivity">
         </activity>
 
         <meta-data
                 android:name="preloaded_fonts"
                 android:resource="@array/preloaded_fonts"/>
 
-        <activity android:name=".controller.TextEditorActivity">
+        <activity android:name=".utils.TextEditorActivity.TextEditorActivity">
         </activity>
         <activity
-                android:name=".controller.SettingsActivity"
+                android:name=".activity.SettingsActivity.SettingsActivity"
                 android:label="@string/title_activity_settings"
-                android:parentActivityName=".activity.presenter.MainActivity">
+                android:parentActivityName="com.okatanaa.timemanager.activity.MainActivity.presenter.MainActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.okatanaa.timemanager.activity.presenter.MainActivity"/>
+                    android:value="com.okatanaa.timemanager.activity.MainActivity.presenter.MainActivity"/>
         </activity>
     </application>
 
